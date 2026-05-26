@@ -12,14 +12,65 @@ async function startServer() {
 
   app.use(express.json());
 
-  const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY || "dummy",
-    httpOptions: {
-      headers: {
-        "User-Agent": "aistudio-build",
+  const createGeminiClient = (apiKey: string) => {
+    return new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          "User-Agent": "aistudio-build",
+        },
       },
-    },
-  });
+    });
+  };
+
+  async function executeGeminiWithFailover<T>(
+    fn: (aiClient: GoogleGenAI) => Promise<T>
+  ): Promise<T> {
+    const primaryKey = process.env.GEMINI_API_KEY;
+    if (!primaryKey) {
+      throw new Error("Missing GEMINI_API_KEY environment variable. Cannot initialize Gemini.");
+    }
+
+    const aiPrimary = createGeminiClient(primaryKey);
+
+    try {
+      console.log("[Gemini Request] Attempting with primary API key...");
+      const result = await fn(aiPrimary);
+      console.log("[Gemini Request] Succeeded on primary API key.");
+      return result;
+    } catch (err: any) {
+      const errorStr = String(err).toLowerCase() + " " + String(err.message || "").toLowerCase();
+      const isQuotaError = 
+        err.status === 429 ||
+        err.statusCode === 429 ||
+        errorStr.includes("429") ||
+        errorStr.includes("resource_exhausted") ||
+        errorStr.includes("quota exceeded") ||
+        errorStr.includes("quota") ||
+        errorStr.includes("rate limit");
+
+      if (isQuotaError) {
+        const fallbackKey = process.env.GEMINI_API_KEY_FALLBACK;
+        if (fallbackKey && fallbackKey !== primaryKey) {
+          console.warn("[Gemini Request] Primary API key quota failover triggered. Retrying with fallback key...");
+          try {
+            const aiFallback = createGeminiClient(fallbackKey);
+            const result = await fn(aiFallback);
+            console.log("[Gemini Request] Succeeded on fallback API key.");
+            return result;
+          } catch (fallbackErr: any) {
+            console.error("[Gemini Request] Fallback API key also failed or quota exceeded:", fallbackErr.message || fallbackErr);
+            throw fallbackErr;
+          }
+        } else {
+          console.warn("[Gemini Request] Quota exceeded on primary, but GEMINI_API_KEY_FALLBACK is not set or identical to primary. Cannot failover.");
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
+  }
 
   // API routes FIRST
   app.post("/api/enrich", async (req, res) => {
@@ -39,11 +90,12 @@ Current Fragments:
 ${fragments?.map((f: any) => `- ${f.fragment_content} (Source: ${f.source_or_author})`).join("\n")}
 `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          systemInstruction: `You are an uncompromising Advaitic Philosophical Engine. You dissect inputs concerning death, mortality, and existentialism. You must distinguish between the two primary traditions of the Marana-Lab:
+      const response = await executeGeminiWithFailover((aiClient) =>
+        aiClient.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: `You are an uncompromising Advaitic Philosophical Engine. You dissect inputs concerning death, mortality, and existentialism. You must distinguish between the two primary traditions of the Marana-Lab:
 
 1. BUDDHIST TRADITION (Buddhism, impermanence, decay, etc.):
    For Buddhism-related nodes, do NOT alter the existing Buddhist concept-generation behavior, Buddhist sources (such as Atisha, Buddhaghosa, Pali Canon), Buddhist prompts, or Buddhist generation style. Continue to use authoritative Buddhist terms (Anicca, Anatta, Skandhas, Marananasati) and verified canonical references.
@@ -62,9 +114,9 @@ ${fragments?.map((f: any) => `- ${f.fragment_content} (Source: ${f.source_or_aut
       - Gospel of Sri Ramakrishna / Sri Sri Ramakrishna Kathamrita (with parallels on death, impermanence, witnesshood, detachment, and God-realization).
       - Bhagavad Gita, especially Chapters 2 and 8 (teachings on the immortal Self and physical departure/transition of the Jiva).
       - Katha Upanishad, especially dialogues on Death and immortality between Nachiketa and Yama.
-      - Principal Upanishads relevant to death and immortality: Brihadaranyaka, Chandogya, Isha, Mundaka, and Mandukya.
+      - Principal Upanishads relevant to death and immortality: Brihadaranyaka, Chadogya, Isha, Mundaka, and Mandukya.
       - Sister Nivedita, especially “The Swami’s Teaching About Death”.
-
+ 
    C. KEY CONCEPTS TO PREFER:
       - Atman, Sakshi (witness-self), body-mind distinction (Deha-Atma-Viveka, Pancha Koshas, Annamaya Kosha).
       - Death as change/transition, not annihilation.
@@ -72,63 +124,64 @@ ${fragments?.map((f: any) => `- ${f.fragment_content} (Source: ${f.source_or_aut
       - Maya, karma, rebirth, Samsara.
       - Vivekananda’s “Think of death always” teaching.
       - Sri Ramakrishna’s Kathamrita metaphors for the witness self.
-
+ 
    D. RESTRICTIONS:
       - Avoid generic spirituality, unaffiliated quote-channel style, motivational phrasing, astrology, tarot, manifestation, and unsourced modern New Age framing. Require strict textual and scholastic grounding.
-
+ 
 3. BENGALI TRANSLATION MAPPINGS (CRITICAL):
    For every node you generate, you MUST provide precise Bengali translations for:
    - 'concept_title' as 'titleBn'
    - 'fragment_content' in each 'text_fragments' item as 'quoteBn'
-
+ 
    Translation style guidelines:
    - Use plain modern Indian Bengali, natural and readable.
    - Avoid overly Sanskritized or old-fashioned Bengali.
    - Keep technical terms readable. Where useful, keep terms like Atman, Sakshi, Neti-Neti, Pancha Kosha, Annamaya, Pranamaya, Manomaya, Anandamaya, Maraṇānusmṛti, Anatta, Skandhas, etc. in transliterated or familiar form (e.g., 'আত্মা', 'সাক্ষী', 'নেতি-নেতি' or 'পঞ্চকোষ', 'মরণানুস্মৃতি', 'অনত্তা', 'স্কন্ধ') rather than forcing awkward Bengali equivalents.
    - The Bengali should help a Bengali reader understand the English, not replace the English.
-
+ 
 CRITICAL: Your output must ALWAYS be in valid JSON matching the following schema. You will receive a Concept Node to analyze or expand. Output an array of node objects. Provide at least 1-3 new child nodes.
-
+ 
 When expanding a node, provide ruthless philosophical clarity. Do not synthesize away the friction. Highlight terms like Atman, Sakshi, Jiva, Manonasa, and Annamaya Kosha in your keywords.`,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                node_id: { type: Type.STRING },
-                concept_title: { type: Type.STRING },
-                titleBn: { type: Type.STRING },
-                grouping_category: { type: Type.STRING },
-                keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
-                text_fragments: {
-                  type: Type.ARRAY,
-                  items: {
-                    type: Type.OBJECT,
-                    properties: {
-                      source_or_author: { type: Type.STRING },
-                      fragment_content: { type: Type.STRING },
-                      quoteBn: { type: Type.STRING },
-                      hyperlink_or_citation: { type: Type.STRING },
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  node_id: { type: Type.STRING },
+                  concept_title: { type: Type.STRING },
+                  titleBn: { type: Type.STRING },
+                  grouping_category: { type: Type.STRING },
+                  keywords: { type: Type.ARRAY, items: { type: Type.STRING } },
+                  text_fragments: {
+                    type: Type.ARRAY,
+                    items: {
+                      type: Type.OBJECT,
+                      properties: {
+                        source_or_author: { type: Type.STRING },
+                        fragment_content: { type: Type.STRING },
+                        quoteBn: { type: Type.STRING },
+                        hyperlink_or_citation: { type: Type.STRING },
+                      },
+                      required: ["source_or_author", "fragment_content", "quoteBn", "hyperlink_or_citation"],
                     },
-                    required: ["source_or_author", "fragment_content", "quoteBn", "hyperlink_or_citation"],
                   },
+                  suggested_sub_concepts: { type: Type.ARRAY, items: { type: Type.STRING } },
                 },
-                suggested_sub_concepts: { type: Type.ARRAY, items: { type: Type.STRING } },
+                required: [
+                  "node_id",
+                  "concept_title",
+                  "titleBn",
+                  "grouping_category",
+                  "keywords",
+                  "text_fragments",
+                  "suggested_sub_concepts"
+                ],
               },
-              required: [
-                "node_id",
-                "concept_title",
-                "titleBn",
-                "grouping_category",
-                "keywords",
-                "text_fragments",
-                "suggested_sub_concepts"
-              ],
             },
           },
-        },
-      });
+        })
+      );
 
       const text = response.text;
       if (!text) {
@@ -160,7 +213,8 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
         ? `The researcher is currently focusing on the concept node: "${activeNodeTitle}".`
         : "The researcher is browsing the overall philosophical node corpus.";
 
-      const response = await ai.models.generateContent({
+      const response = await executeGeminiWithFailover((aiClient) =>
+        aiClient.models.generateContent({
         model: "gemini-3.5-flash",
         contents: `${activeContextPrompt}\n\nReview the dialogue history below, provide a scholarly, profound, and respectful response, and evaluate if the topic is a concrete, trace-worthy addition to the death-study map:\n\n${promptContext}`,
         config: {
@@ -276,7 +330,7 @@ The output must always be a valid JSON matching the schema below.`,
             required: ["text", "newNodes"],
           },
         },
-      });
+      }));
 
       const responseText = response.text;
       if (!responseText) {
@@ -312,27 +366,29 @@ List of nodes to translate:
 ${JSON.stringify(nodesToTranslate, null, 2)}
 `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          systemInstruction: `You must output a JSON array matching the request. For each item in the input, provide an object containing 'id', and optionally 'titleBn' and/or 'quoteBn' matching the requested translations.
+      const response = await executeGeminiWithFailover((aiClient) =>
+        aiClient.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            systemInstruction: `You must output a JSON array matching the request. For each item in the input, provide an object containing 'id', and optionally 'titleBn' and/or 'quoteBn' matching the requested translations.
 Do not wrap or nest inside other keys, just return the array of translated items.`,
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                id: { type: Type.STRING },
-                titleBn: { type: Type.STRING },
-                quoteBn: { type: Type.STRING },
-              },
-              required: ["id"],
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  id: { type: Type.STRING },
+                  titleBn: { type: Type.STRING },
+                  quoteBn: { type: Type.STRING },
+                },
+                required: ["id"],
+              }
             }
           }
-        }
-      });
+        })
+      );
 
       const text = response.text;
       if (!text) {
