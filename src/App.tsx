@@ -89,7 +89,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
   ]);
   const [chatLoading, setChatLoading] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
-  const inFlightOrCompletedTranslationIds = useRef<Set<string>>(new Set());
+  const [translationError, setTranslationError] = useState<string | null>(null);
 
   // Drive integration UI state
   const [showDriveModal, setShowDriveModal] = useState(false);
@@ -156,73 +156,6 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
     };
   }, []);
 
-  // Static Local Translation Dictionary for immediate backfill matches
-  const LOCAL_BENGALI_DICTIONARY: Record<string, { titleBn: string; quoteBn: string }> = {
-    "Maraṇānusmṛti & The Buddhist Pivot": {
-      titleBn: "মরণানুস্মৃতি এবং বৌদ্ধ দৃষ্টিভঙ্গি",
-      quoteBn: "মৃত্যু অনিবার্য; প্রত্যেককেই মরতে হবে। মানুষের আয়ু ক্রমাগত কমে যাচ্ছে, এবং শেষ মুহূর্ত আসার আগে মানুষ প্রস্তুতি নিক বা না নিক, মৃত্যু অবশ্যই আসবে।"
-    },
-    "The Vedantic Turn: Witness Consciousness": {
-      titleBn: "বেদান্তের অভিমুখ: সাক্ষী চেতনা",
-      quoteBn: "শরীর হলো দৃশ্য রূপ বা দৃষ্ট বস্তু, আর সাক্ষী সর্বদা তার চারপাশের বস্তুসমূহের বিলয় বা বিনাশের দ্বারা অস্পর্শিত থাকে।"
-    },
-    "Pancha Kosha Viveka: Dissolving the Envelopes of Mortality": {
-      titleBn: "পঞ্চকোষ বিবেক: মরণশীলতার আবরণগুলি চিনে আলাদা করা",
-      quoteBn: "অন্নময় এই স্থূল দেহের থেকে আলাদা আছে প্রাণময় স্তর; তারও গভীরে আছে মনোময় স্তর... আনন্দময় পর্যন্ত সব স্তরকেই আত্মা ধারণ করে, কিন্তু আত্মা নিজে তাদের সবকিছুর অতীত।"
-    },
-    "Katha Upanishad: Yama's Secret of the Undying Self": {
-      titleBn: "কঠোপনিষদ: যমের অমর আত্মা বিষয়ক রহস্য",
-      quoteBn: "মন বা শরীর শেষ হলেও এই আত্মা শেষ হয় না; যেমন রথ ধ্বংস হলেও রথী অক্ষত থাকে তেমনি আত্মা কোনো জন্ম এবং মৃত্যুর অধীন নয়।"
-    },
-    "Preya vs Sreya": {
-      titleBn: "প্রেয় বনাম শ্রেয়",
-      quoteBn: "প্রেয় মানুষকে আপাত সুখের পথে চালিত করে যা বিনাশশীল, আর শ্রেয় তাকে চালিত করে কল্যাণের ও অমরত্বের পথে।"
-    },
-    "Abhaya / fearlessness": {
-      titleBn: "অভয় / ভয়হীনতা",
-      quoteBn: "বিবেক বা জ্ঞান জন্মালে ভয় দূর হয়; যখন সাধক দেখেন যে সবকিছুর অভ্যন্তরে এক অদ্বিতীয় আত্মাই বিরাজ করছেন, তখন কার কার প্রতি ভয় থাকবে?"
-    },
-    "Nachiketa's refusal of Yama's gifts": {
-      titleBn: "নচিকেতার যমের উপহার প্রত্যাখ্যান",
-      quoteBn: "নচিকেতা বুঝেছিলেন যে জাগতিক সমস্ত ভোগসামগ্রী ও পার্থিব ধন-সম্পদ ক্ষণস্থায়ী, তাই তিনি তা প্রত্যাখ্যান করে চিরন্তন আত্মজ্ঞান লাভের জন্য অনড় ছিলেন।"
-    },
-    "Deha-Atma-Viveka": {
-      titleBn: "দেহ-আত্মা-বিবেক",
-      quoteBn: "বুদ্ধি প্রয়োগ করে অবিনশ্বর আত্মাকে নশ্বর শরীর ও মন থেকে পৃথক করে অনুভব করা বা চিনে নেওয়া।"
-    },
-    "Sakshi and deathlessness": {
-      titleBn: "সাক্ষী ও অমরত্ব",
-      quoteBn: "সাক্ষী-চৈতন্য কোনো পরিবর্তনের দ্বারা বিকৃত হয় না এবং এটি জন্ম, বার্ধক্য বা মৃত্যুর স্পর্শহীন পরম সত্য।"
-    },
-    "Maranasati / Marananusmriti": {
-      titleBn: "মরণসতী / মরণানুস্মৃতি",
-      quoteBn: "নিয়মিত মৃত্যুর কথা স্মরণ করার মাধ্যমে আসক্তি ত্যাগ করে মুক্তির অভিমুখে সাধন করা।"
-    },
-    "body decay contemplation": {
-      titleBn: "দেহ পচনশীলতার ধ্যান",
-      quoteBn: "এই রক্ত-মাংসে তৈরি নশ্বর শরীর একদিন মাটিতে মিশে যাবে, এই সত্য উপলব্ধি করে আসক্তি ছিন্ন করা।"
-    },
-    "rebirth and liberation": {
-      titleBn: "পুনর্জন্ম এবং মুক্তি",
-      quoteBn: "যতক্ষণ না জীব স্বীয় আত্মস্বরূপ চিনে মুক্ত হচ্ছে, ততক্ষণ কর্মফল অনুযায়ী তার রূপান্তর বা পুনরাগমন ঘটে।"
-    },
-    "impermanence and no-self": {
-      titleBn: "অনিত্যতা ও অনত্তা (অনাশ্মা)",
-      quoteBn: "জগতে স্থায়ী বা অপরিবর্তনীয় কোনো কিছুর অস্তিত্ব নেই; এমনকি ক্ষণস্থায়ী অহংবোধও কোনো চিরন্তন সত্য নয়।"
-    }
-  };
-
-  const getLocalTranslation = (title: string) => {
-    const cleanTitle = title.trim().toLowerCase();
-    for (const key of Object.keys(LOCAL_BENGALI_DICTIONARY)) {
-      const cleanKey = key.trim().toLowerCase();
-      if (cleanTitle.includes(cleanKey) || cleanKey.includes(cleanTitle)) {
-        return LOCAL_BENGALI_DICTIONARY[key];
-      }
-    }
-    return null;
-  };
-
   const backfillBengaliTranslations = async (uid: string, treeNodes: ConceptNode[]): Promise<ConceptNode[]> => {
     const flattenList = (list: ConceptNode[]): ConceptNode[] => {
       let flat: ConceptNode[] = [];
@@ -241,45 +174,21 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
     const missingTranslationNodes: { id: string; title?: string; quote?: string }[] = [];
 
     flat.forEach((node) => {
-      let nodeMutated = false;
-      const local = getLocalTranslation(node.concept_title);
-
-      if (!node.titleBn) {
-        if (local) {
-          node.titleBn = local.titleBn;
-          nodeMutated = true;
-        }
-      }
-
-      if (node.text_fragments && node.text_fragments.length > 0) {
-        const frag = node.text_fragments[0];
-        if (!frag.quoteBn) {
-          if (local) {
-            frag.quoteBn = local.quoteBn;
-            nodeMutated = true;
-          }
-        }
-      }
-
       const titleMissing = !node.titleBn;
       const quoteMissing = node.text_fragments && node.text_fragments.length > 0 && !node.text_fragments[0].quoteBn;
 
       if (titleMissing || quoteMissing) {
-        if (!inFlightOrCompletedTranslationIds.current.has(node.node_id)) {
-          inFlightOrCompletedTranslationIds.current.add(node.node_id);
-          missingTranslationNodes.push({
-            id: node.node_id,
-            title: titleMissing ? node.concept_title : undefined,
-            quote: quoteMissing ? node.text_fragments![0].fragment_content : undefined,
-          });
-        }
-      } else if (nodeMutated) {
-        mutatedCount++;
+        missingTranslationNodes.push({
+          id: node.node_id,
+          title: titleMissing ? node.concept_title : undefined,
+          quote: quoteMissing ? node.text_fragments![0].fragment_content : undefined,
+        });
       }
     });
 
     if (missingTranslationNodes.length > 0) {
       try {
+        setTranslationError(null);
         const response = await fetch("/api/translate-nodes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -299,14 +208,20 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                   node.text_fragments[0].quoteBn = t.quoteBn;
                   mutatedCount++;
                 }
-                // Mark as completed in-flight tracking
-                inFlightOrCompletedTranslationIds.current.add(node.node_id);
               }
             });
           }
+        } else {
+          try {
+            const data = await response.json();
+            setTranslationError(data.error || `Server responded with status ${response.status}`);
+          } catch (_) {
+            setTranslationError(`Server responded with status ${response.status}`);
+          }
         }
-      } catch (err) {
-        console.error("Backfiller service failed, proceeding with local-only fallback:", err);
+      } catch (err: any) {
+        setTranslationError(err.message || String(err));
+        console.error("Backfiller service failed:", err);
       }
     }
 
@@ -688,6 +603,31 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
             >
               <RotateCw className="w-3.5 h-3.5" />
               Retry Sync
+            </button>
+          </div>
+        </div>
+      )}
+
+      {translationError && (
+        <div className="bg-red-950/20 border-b border-red-900/40 text-red-200 py-2.5 px-4 text-xs font-sans">
+          <div className="mx-auto flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="text-red-500 w-4 h-4" />
+              <span>
+                <strong>Translation Service Error:</strong> {translationError}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setTranslationError(null);
+                if (currentUser) {
+                  syncUserNodes(currentUser.uid);
+                }
+              }}
+              className="flex items-center gap-1.5 px-3 py-1 bg-red-900/40 hover:bg-red-900/60 text-red-100 rounded border border-red-700/50 transition-colors uppercase tracking-normal text-xs font-sans font-medium hover:cursor-pointer"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+              Retry Translation
             </button>
           </div>
         </div>

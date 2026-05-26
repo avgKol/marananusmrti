@@ -139,9 +139,7 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
       res.json(parsed);
     } catch (err: any) {
       console.error("Gemini Error:", err);
-      const isQuota = err.message?.toLowerCase().includes("quota") || err.message?.toLowerCase().includes("429") || err.message?.toLowerCase().includes("resource_exhausted") || String(err).toLowerCase().includes("429") || String(err).toLowerCase().includes("quota");
-      const msg = isQuota ? "The scholar is resting (Gemini API quota limit exceeded). Please retry in a moment." : (err.message || "Failed to parse or communicate with Gemini.");
-      res.status(500).json({ error: msg });
+      res.status(500).json({ error: err.message || String(err) });
     }
   });
 
@@ -289,137 +287,9 @@ The output must always be a valid JSON matching the schema below.`,
       res.json(parsed);
     } catch (err: any) {
       console.error("Chat Error:", err);
-      const isQuota = err.message?.toLowerCase().includes("quota") || err.message?.toLowerCase().includes("429") || err.message?.toLowerCase().includes("resource_exhausted") || String(err).toLowerCase().includes("429") || String(err).toLowerCase().includes("quota");
-      const msg = isQuota ? "The scholar is resting (Gemini API quota limit exceeded). Please retry in a moment." : (err.message || "Scholar Assistant failed to generate a response.");
-      res.status(500).json({ error: msg });
+      res.status(500).json({ error: err.message || String(err) });
     }
   });
-
-  const LOCAL_BENGALI_DICTIONARY: Record<string, { titleBn: string; quoteBn: string }> = {
-    "maraṇānusmṛti & the buddhist pivot": {
-      titleBn: "মরণানুস্মৃতি এবং বৌদ্ধ দৃষ্টিভঙ্গি",
-      quoteBn: "মৃত্যু অনিবার্য; প্রত্যেককেই মরতে হবে। মানুষের আয়ু ক্রমাগত কমে যাচ্ছে, এবং শেষ মুহূর্ত আসার আগে মানুষ প্রস্তুতি নিক বা না নিক, মৃত্যু অবশ্যই আসবে।"
-    },
-    "the vedantic turn: witness consciousness": {
-      titleBn: "বেদান্তের অভিমুখ: সাক্ষী চেতনা",
-      quoteBn: "শরীর হলো দৃশ্য রূপ বা দৃষ্ট বস্তু, আর সাক্ষী সর্বদা তার চারপাশের বস্তুসমূহের বিলয় বা বিনাশের দ্বারা অস্পর্শিত থাকে।"
-    },
-    "pancha kosha viveka: dissolving the envelopes of mortality": {
-      titleBn: "পঞ্চকোষ বিবেক: মরণশীলতার আবরণগুলি চিনে আলাদা করা",
-      quoteBn: "অন্নময় এই স্থূল দেহের থেকে আলাদা আছে প্রাণময় স্তর; তারও গভীরে আছে মনোময় স্তর... আনন্দময় পর্যন্ত সব স্তরকেই আত্মা ধারণ করে, কিন্তু আত্মা নিজে তাদের সবকিছুর অতীত।"
-    },
-    "katha upanishad: yama's secret of the undying self": {
-      titleBn: "কঠোপনিষদ: যমের অমর আত্মা বিষয়ক রহস্য",
-      quoteBn: "মন বা শরীর শেষ হলেও এই আত্মা শেষ হয় না; যেমন রথ ধ্বংস হলেও রথী অক্ষত থাকে তেমনি আত্মা কোনো জন্ম এবং মৃত্যুর অধীন নয়।"
-    },
-    "preya vs sreya": {
-      titleBn: "প্রেয় বনাম শ্রেয়",
-      quoteBn: "প্রেয় মানুষকে আপাত সুখের পথে চালিত করে যা বিনাশশীল, আর শ্রেয় তাকে চালিত করে কল্যাণের ও অমরত্বের পথে।"
-    },
-    "abhaya / fearlessness": {
-      titleBn: "অভয় / ভয়হীনতা",
-      quoteBn: "বিবেক বা জ্ঞান জন্মালে ভয় দূর হয়; যখন সাধক দেখেন যে সবকিছুর অভ্যন্তরে এক অদ্বিতীয় আত্মাই বিরাজ করছেন, তখন কার কার প্রতি ভয় থাকবে?"
-    },
-    "nachiketa's refusal of yama's gifts": {
-      titleBn: "নচিকেতার যমের উপহার প্রত্যাখ্যান",
-      quoteBn: "নচিকেতা বুঝেছিলেন যে জাগতিক সমস্ত ভোগসামজ্ঞী ও পার্থিব ধন-সম্পদ ক্ষণস্থায়ী, তাই তিনি তা প্রত্যাখ্যান করে চিরন্তন আত্মজ্ঞান লাভের জন্য অনড় ছিলেন।"
-    },
-    "deha-atma-viveka": {
-      titleBn: "দেহ-আত্মা-বিবেক",
-      quoteBn: "বুদ্ধি প্রয়োগ করে অবিনশ্বর আত্মাকে নশ্বর শরীর ও মন থেকে পৃথক করে অনুভব করা বা চিনে নেওয়া।"
-    },
-    "sakshi and deathlessness": {
-      titleBn: "সাক্ষী ও অমরত্ব",
-      quoteBn: "সাক্ষী-চৈতন্য কোনো পরিবর্তনের দ্বারা বিকৃত হয় না এবং এটি জন্ম, বার্ধক্য বা মৃত্যুর স্পর্শহীন পরম সত্য।"
-    },
-    "maranasati / marananusmriti": {
-      titleBn: "মরণসতী / মরণানুস্মৃতি",
-      quoteBn: "নিয়মিত মৃত্যুর কথা স্মরণ করার মাধ্যমে আসক্তি ত্যাগ করে মুক্তির অভিমুখে সাধন করা।"
-    },
-    "body decay contemplation": {
-      titleBn: "দেহ পচনশীলতার ধ্যান",
-      quoteBn: "এই রক্ত-মাংসে তৈরি নশ্বর শরীর একদিন মাটিতে মিশে যাবে, এই সত্য উপলব্ধি করে আসক্তি ছিন্ন করা।"
-    },
-    "rebirth and liberation": {
-      titleBn: "পুনর্জন্ম এবং মুক্তি",
-      quoteBn: "যতক্ষণ না জীব স্বীয় আত্মস্বরূপ চিনে মুক্ত হচ্ছে, ততক্ষণ কর্মফল অনুযায়ী তার রূপান্তর বা পুনরাগমন ঘটে।"
-    },
-    "impermanence and no-self": {
-      titleBn: "অনিত্যতা ও অনত্তা (অনাশ্মা)",
-      quoteBn: "জগতে স্থায়ী বা অপরিবর্তনীয় কোনো কিছুর অস্তিত্ব নেই; এমনকি ক্ষণস্থায়ী অহংবোধও কোনো চিরন্তন সত্য নয়।"
-    }
-  };
-
-  const getLocalTranslation = (title: string) => {
-    const cleanTitle = title.trim().toLowerCase();
-    for (const key of Object.keys(LOCAL_BENGALI_DICTIONARY)) {
-      const cleanKey = key.trim().toLowerCase();
-      if (cleanTitle.includes(cleanKey) || cleanKey.includes(cleanTitle)) {
-        return LOCAL_BENGALI_DICTIONARY[key];
-      }
-    }
-    return null;
-  };
-
-  const getFallbackTranslation = (text: string, isQuote: boolean = false): string => {
-    if (!text) return "";
-    const lower = text.toLowerCase();
-
-    // Map of common Sanskrit / philosophical terms to Bengali script
-    const glossary: Record<string, string> = {
-      "maraṇānusmṛti": "মরণানুস্মৃতি",
-      "marananusmriti": "মরণানুস্মৃতি",
-      "maranasati": "মরণসতী",
-      "pancha kosha": "পঞ্চকোষ",
-      "panchakusha": "পঞ্চকোষ",
-      "kosha": "কোষ",
-      "viveka": "বিবেক",
-      "katha upanishad": "কঠোপনিষদ",
-      "upanishad": "উপনিষদ",
-      "yama": "যম",
-      "nachiketa": "নচিকেতা",
-      "preya": "প্রেয়",
-      "sreya": "শ্রেয়",
-      "abhaya": "অভয়",
-      "fearlessness": "ভয়হীনতা",
-      "deha": "দেহ",
-      "atma": "আত্মা",
-      "atman": "আত্মা",
-      "sakshi": "সাক্ষী",
-      "witness": "সাক্ষী",
-      "consciousness": "চেতনা",
-      "deathlessness": "অমরত্ব",
-      "death": "মৃত্যু",
-      "impermanence": "অনিত্যতা",
-      "no-self": "অনত্তা / অনাশ্মা",
-      "buddhism": "বৌদ্ধ দর্শন",
-      "buddhist": "বৌদ্ধ",
-      "vedanta": "বেদান্ত",
-      "vedantic": "বেদান্ত",
-      "liberation": "মুক্তি",
-      "body decay": "দেহ পচনশীলতা",
-      "contemplation": "ধ্যান",
-      "rebirth": "পুনর্জন্ম"
-    };
-
-    // Check if the text matches any glossary key
-    const matched: string[] = [];
-    for (const [key, val] of Object.entries(glossary)) {
-      if (lower.includes(key)) {
-        matched.push(val);
-      }
-    }
-
-    if (matched.length > 0) {
-      if (isQuote) {
-        return `[অনুবাদ - ${matched.join(" ও ")}] সম্পর্কিত সূত্র: "${text}"`;
-      } else {
-        return matched.join(" / ");
-      }
-    }
-
-    return isQuote ? `"${text}"` : text;
-  };
 
   // Dynamic Bengali Translation Backfiller Endpoint
   app.post("/api/translate-nodes", async (req, res) => {
@@ -429,111 +299,51 @@ The output must always be a valid JSON matching the schema below.`,
         return res.json({ translations: [] });
       }
 
-      const results: { id: string; titleBn?: string; quoteBn?: string }[] = [];
-      const geminiToTranslate: any[] = [];
-
-      for (const item of nodesToTranslate) {
-        const local = item.title ? getLocalTranslation(item.title) : null;
-        if (local) {
-          results.push({
-            id: item.id,
-            titleBn: local.titleBn,
-            quoteBn: local.quoteBn
-          });
-        } else {
-          geminiToTranslate.push(item);
-        }
+      if (!process.env.GEMINI_API_KEY) {
+        return res.status(500).json({ error: "Missing GEMINI_API_KEY environment variable. Cannot translate nodes." });
       }
 
-      const attemptGemini = geminiToTranslate.length > 0 && process.env.GEMINI_API_KEY;
-
-      if (attemptGemini) {
-        console.log(`[Translation Service] Translating ${geminiToTranslate.length} nodes using Gemini API...`);
-        const prompt = `You are an eminent translator specializing in modern comparative religion and Indian philosophy (Advaita Vedanta and Buddhism). 
+      console.log(`[Translation Service] Translating ${nodesToTranslate.length} nodes using Gemini API...`);
+      const prompt = `You are an eminent translator specializing in modern comparative religion and Indian philosophy (Advaita Vedanta and Buddhism). 
 Translate the following fields to plain, natural modern Indian Bengali.
 Keep technical terms readable. Where useful, keep terms like Atman, Sakshi, Neti-Neti, Pancha Kosha, Annamaya, Pranamaya, Manomaya, Anandamaya, Maraṇānusmṛti, Anatta, Skandhas, etc. in transliterated or familiar form (like 'আত্মা', 'সাক্ষী', 'নেতি-নেতি' or 'পঞ্চকোষ', 'মরণানুস্মৃতি', 'অনত্তা', 'স্কন্ধ') rather than forcing awkward Bengali equivalents.
 
 List of nodes to translate:
-${JSON.stringify(geminiToTranslate, null, 2)}
+${JSON.stringify(nodesToTranslate, null, 2)}
 `;
 
-        try {
-          const response = await ai.models.generateContent({
-            model: "gemini-3.5-flash",
-            contents: prompt,
-            config: {
-              systemInstruction: `You must output a JSON array matching the request. For each item in the input, provide an object containing 'id', and optionally 'titleBn' and/or 'quoteBn' matching the requested translations.
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction: `You must output a JSON array matching the request. For each item in the input, provide an object containing 'id', and optionally 'titleBn' and/or 'quoteBn' matching the requested translations.
 Do not wrap or nest inside other keys, just return the array of translated items.`,
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    id: { type: Type.STRING },
-                    titleBn: { type: Type.STRING },
-                    quoteBn: { type: Type.STRING },
-                  },
-                  required: ["id"],
-                }
-              }
-            }
-          });
-
-          const text = response.text;
-          if (text) {
-            const parsed = JSON.parse(text);
-            if (Array.isArray(parsed)) {
-              parsed.forEach((t: any) => {
-                results.push(t);
-              });
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                id: { type: Type.STRING },
+                titleBn: { type: Type.STRING },
+                quoteBn: { type: Type.STRING },
+              },
+              required: ["id"],
             }
           }
-        } catch (geminiErr: any) {
-          console.warn("[Translation Service] Gemini API failed (likely quota exceeded or rate limit):", geminiErr.message || geminiErr);
-          // We will run fallback translations for these nodes, so do not return early or throw!
         }
+      });
+
+      const text = response.text;
+      if (!text) {
+        throw new Error("No response text from Gemini translation.");
       }
 
-      // Ensure EVERY item in nodesToTranslate gets filled to prevent future backfiller loops
-      for (const item of nodesToTranslate) {
-        const found = results.find(r => r.id === item.id);
-        if (found) {
-          if (!found.titleBn && item.title) {
-            found.titleBn = getFallbackTranslation(item.title, false);
-          }
-          if (!found.quoteBn && item.quote) {
-            found.quoteBn = getFallbackTranslation(item.quote, true);
-          }
-        } else {
-          results.push({
-            id: item.id,
-            titleBn: item.title ? getFallbackTranslation(item.title, false) : undefined,
-            quoteBn: item.quote ? getFallbackTranslation(item.quote, true) : undefined
-          });
-        }
-      }
-
-      res.json({ translations: results });
+      const parsed = JSON.parse(text);
+      res.json({ translations: parsed });
     } catch (err: any) {
-      console.error("Translation API General Error:", err);
-      // Even under General Error, try to fulfill with fallbacks if nodes are present
-      try {
-        const { nodesToTranslate } = req.body;
-        const results: { id: string; titleBn?: string; quoteBn?: string }[] = [];
-        if (Array.isArray(nodesToTranslate)) {
-          for (const item of nodesToTranslate) {
-            results.push({
-              id: item.id,
-              titleBn: item.title ? getFallbackTranslation(item.title, false) : undefined,
-              quoteBn: item.quote ? getFallbackTranslation(item.quote, true) : undefined
-            });
-          }
-        }
-        return res.json({ translations: results, error: err.message });
-      } catch (innerErr) {
-        res.json({ translations: [], error: err.message || "Failed to translate nodes." });
-      }
+      console.error("Translation API Error:", err);
+      res.status(500).json({ error: err.message || String(err) });
     }
   });
 
