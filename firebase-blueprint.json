@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "ConceptNode": {
+      "title": "ConceptNode",
+      "description": "A node in the philosophical concept graph.",
+      "type": "object",
+      "properties": {
+        "node_id": {
+          "type": "string"
+        },
+        "concept_title": {
+          "type": "string"
+        },
+        "grouping_category": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array"
+        },
+        "text_fragments": {
+          "type": "array"
+        },
+        "suggested_sub_concepts": {
+          "type": "array"
+        },
+        "parentId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "node_id",
+        "concept_title",
+        "grouping_category",
+        "keywords",
+        "text_fragments",
+        "suggested_sub_concepts",
+        "userId",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "nodes/{nodeId}": {
+      "schema": "ConceptNode",
+      "description": "Flat collection of philosophical concept nodes, keyed by node_id."
+    }
+  }
+}

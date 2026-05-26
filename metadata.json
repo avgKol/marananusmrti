@@ -1,0 +1,8 @@
+{
+  "name": "Take2: Philosophical Concept Graph",
+  "description": "A recursive Concept Graph visualizer demonstrating AI-driven node enrichment for exploring philosophical ideas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
