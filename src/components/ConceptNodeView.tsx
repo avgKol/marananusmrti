@@ -19,6 +19,7 @@ interface ConceptNodeProps {
   selectedNodeId: string | null;
   onSelectNode: (nodeId: string) => void;
   onSuggestedClick?: (conceptName: string) => void;
+  indexedNodes?: Record<string, any>;
 }
 
 export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
@@ -29,6 +30,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
   selectedNodeId,
   onSelectNode,
   onSuggestedClick,
+  indexedNodes,
 }) => {
   const [expanded, setExpanded] = useState(true); // Default parent nodes to expanded for structural visibility
   const [loading, setLoading] = useState(false);
@@ -124,24 +126,88 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
   const theme = getTraditionTheme(node.grouping_category, node.concept_title);
   const isKeywordHighlighted = activeKeyword && node.keywords.includes(activeKeyword);
 
+  const analysis = indexedNodes?.[node.node_id];
+  const classification = analysis ? analysis.classification : "none";
+  const explanation = analysis ? analysis.explanation : "";
+
+  let outerClass = "ml-4 md:ml-8 mb-6 border-l pl-4 md:pl-6 transition-all duration-300 ";
+  let cardClass = "group relative flex flex-col p-6 rounded-lg border transition-all duration-200 cursor-pointer ";
+  let badgeEl: React.ReactNode = null;
+  let explanationEl: React.ReactNode = null;
+
+  if (activeKeyword && classification && classification !== "none") {
+    if (classification === "direct") {
+      outerClass += "border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.15)]";
+      cardClass += isSelected 
+        ? "border-amber-400 bg-[#161722] shadow-[0_4px_20px_rgba(245,158,11,0.12)] animate-[pulse_3s_infinite]" 
+        : "border-amber-500 bg-[#12131b] shadow-[0_2px_12px_rgba(245,158,11,0.06)]";
+      badgeEl = (
+        <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-550/80 px-2.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.25)] flex items-center gap-1 shrink-0">
+          <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+          Direct
+        </span>
+      );
+    } else if (classification === "strong") {
+      outerClass += "border-amber-750";
+      cardClass += isSelected 
+        ? "border-amber-550 bg-[#13141d] shadow-[0_4px_16px_rgba(217,119,6,0.1)]" 
+        : "border-amber-700/60 bg-[#101117]/95";
+      badgeEl = (
+        <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider bg-amber-950/60 text-amber-400/90 border border-amber-800/40 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+          Connected
+        </span>
+      );
+    } else if (classification === "bridge") {
+      outerClass += "border-slate-700";
+      cardClass += isSelected 
+        ? "border-amber-500 bg-[#111219]" 
+        : "border-slate-800 hover:border-slate-700 bg-gradient-to-b from-[#0e0f14] to-[#090a0d]";
+      badgeEl = (
+        <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider bg-teal-950/40 text-teal-300 border border-teal-850/35 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+          <span className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
+          Bridge
+        </span>
+      );
+    } else {
+      // Unrelated
+      outerClass += "border-slate-900/30 opacity-40 hover:opacity-95 transition-all duration-300";
+      cardClass += isSelected 
+        ? "border-slate-755 bg-[#0e0f15]"
+        : "border-slate-900 bg-slate-950/20";
+    }
+
+    if (classification !== "unrelated" && explanation) {
+      explanationEl = (
+        <div className="mt-2.5 flex items-center gap-1.5 text-[11px] font-sans text-amber-400 bg-amber-950/20 px-2.5 py-1 rounded border border-amber-900/30 w-fit">
+          <Compass size={11.5} className="text-amber-500 animate-[spin_10s_linear_infinite]" />
+          <span>{explanation}</span>
+        </div>
+      );
+    }
+  } else {
+    // Normal Mode
+    outerClass += isKeywordHighlighted ? "border-amber-500" : "border-slate-800";
+    cardClass += isSelected
+      ? "border-amber-500/80 shadow-[0_4px_20px_rgba(245,158,11,0.08)] bg-[#12131a]" 
+      : isKeywordHighlighted
+        ? "border-amber-700/60 bg-[#101117]"
+        : "border-slate-800 hover:border-slate-700 hover:bg-slate-900/40 bg-gradient-to-b from-[#0e0f14] to-[#0a0b0e]";
+  }
+
   return (
-    <div className={`ml-4 md:ml-8 mb-6 border-l pl-4 md:pl-6 transition-all duration-300 ${isKeywordHighlighted ? "border-amber-500" : "border-slate-800"}`}>
+    <div id={`node-view-${node.node_id}`} className={outerClass}>
       <div 
         onClick={handleSelect}
-        className={`group relative flex flex-col p-6 rounded-lg border transition-all duration-200 cursor-pointer ${
-          isSelected 
-            ? "border-amber-500/80 shadow-[0_4px_20px_rgba(245,158,11,0.08)] bg-[#12131a]" 
-            : isKeywordHighlighted
-              ? "border-amber-700/60 bg-[#101117]"
-              : "border-slate-800 hover:border-slate-700 hover:bg-slate-900/40 bg-gradient-to-b from-[#0e0f14] to-[#0a0b0e]"
-        } ${theme.glow}`}
+        className={`${cardClass} ${theme.glow}`}
       >
         {/* Tradition Badge + Basic Stats Row */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs font-sans px-2.5 py-1 rounded-md border ${theme.badgeColor} tracking-normal font-medium`}>
               {theme.name}
             </span>
+            {badgeEl}
             <span className="text-xs font-sans text-slate-450 font-medium truncate max-w-[200px]">
               {node.grouping_category}
             </span>
@@ -215,6 +281,8 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
             )}
           </div>
         )}
+
+        {explanationEl}
 
         {/* Selected Highlight Strip */}
         {isSelected && (
@@ -294,6 +362,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
                 selectedNodeId={selectedNodeId}
                 onSelectNode={onSelectNode}
                 onSuggestedClick={onSuggestedClick}
+                indexedNodes={indexedNodes}
               />
             ))}
           </motion.div>

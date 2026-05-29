@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { initialNodes } from "./data";
 import { ConceptNode } from "./types";
 import { ConceptNodeView } from "./components/ConceptNodeView";
+import { analyzeFocusVector, filterFocusedTree } from "./utils/focusAnalysis";
 import ReactMarkdown from "react-markdown";
 import { 
   initializeFirebaseWithRetries, 
@@ -55,6 +56,39 @@ export default function App() {
   const [nodes, setNodes] = useState<ConceptNode[]>(initialNodes);
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [showOnlyFocused, setShowOnlyFocused] = useState(false);
+
+  // Compute focus analysis for concept-lens
+  const focusResult = useMemo(() => {
+    return analyzeFocusVector(nodes, activeKeyword);
+  }, [nodes, activeKeyword]);
+
+  const renderedNodes = useMemo(() => {
+    if (showOnlyFocused && activeKeyword) {
+      return filterFocusedTree(nodes, focusResult.indexedNodes);
+    }
+    return nodes;
+  }, [nodes, showOnlyFocused, activeKeyword, focusResult.indexedNodes]);
+
+  const focusNodesByGroup = useMemo(() => {
+    const direct: any[] = [];
+    const strong: any[] = [];
+    const bridge: any[] = [];
+    
+    Object.values(focusResult.indexedNodes).forEach((idxNode) => {
+      if (idxNode.classification === "direct") direct.push(idxNode);
+      else if (idxNode.classification === "strong") strong.push(idxNode);
+      else if (idxNode.classification === "bridge") bridge.push(idxNode);
+    });
+    
+    return { direct, strong, bridge };
+  }, [focusResult.indexedNodes]);
+
+  useEffect(() => {
+    if (!activeKeyword) {
+      setShowOnlyFocused(false);
+    }
+  }, [activeKeyword]);
 
   // Connection & Auth state
   const [firebaseState, setFirebaseState] = useState<FirebaseState>({
@@ -355,6 +389,23 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
   const handleKeywordClick = (kw: string) => {
     setActiveKeyword((prev) => (prev === kw ? null : kw));
+  };
+
+  const handleScrollToFocusCategory = (category: "direct" | "strong" | "bridge") => {
+    const match = Object.values(focusResult.indexedNodes).find(
+      (idx) => idx.classification === category
+    );
+    if (match) {
+      const el = document.getElementById(`node-view-${match.node_id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Give a temporary highlight/glow
+        el.classList.add("ring-2", "ring-amber-500", "ring-offset-2", "ring-offset-slate-950", "scale-[1.015]", "transition-all", "duration-500");
+        setTimeout(() => {
+          el.classList.remove("ring-2", "ring-amber-500", "ring-offset-2", "ring-offset-slate-950", "scale-[1.015]");
+        }, 2200);
+      }
+    }
   };
 
   const handleSelectNode = (nodeId: string) => {
@@ -873,6 +924,152 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
             {/* TAB B: PROVENANCE COMMENTARY INSPECTOR */}
             {leftTab === "evidence" && (
               <div className="space-y-6">
+                {activeKeyword && (
+                  <div className="p-6 bg-gradient-to-b from-[#12131b] to-[#0a0b0f] border border-amber-900/35 rounded-lg space-y-5">
+                    {/* Header with Title and Active Vector */}
+                    <div className="flex items-center justify-between border-b border-amber-900/20 pb-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        <h3 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-widest">
+                          Focus Study Desk
+                        </h3>
+                      </div>
+                      <span className="text-xs font-sans bg-amber-950/50 text-amber-300 px-2.5 py-0.5 rounded border border-amber-800/40">
+                        Lens: #{activeKeyword}
+                      </span>
+                    </div>
+
+                    {/* Scholarly Concept Summary Section */}
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Scholarly Concept Synthesis:</span>
+                      <p className="text-xs font-sans text-slate-300 leading-relaxed bg-[#12131a]/40 p-4 border border-slate-900 rounded-md">
+                        {focusResult.conceptSummary}
+                      </p>
+                    </div>
+
+                    {/* Target Constellation Nodes Group Grid */}
+                    <div className="space-y-3.5">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Focused Core Constellation:</span>
+                      <div className="grid grid-cols-1 gap-2.5">
+                        {/* Direct Nodes */}
+                        {focusNodesByGroup.direct.length > 0 && (
+                          <div className="space-y-1.5">
+                            <h5 className="text-[11px] font-sans text-amber-400 font-bold flex items-center gap-1">
+                              <span className="w-1 to-amber-500 h-2 bg-amber-550 rounded" /> Direct Target Nodes
+                            </h5>
+                            <div className="flex flex-wrap gap-1.5">
+                              {focusNodesByGroup.direct.map((dn) => (
+                                <button
+                                  key={dn.node_id}
+                                  onClick={() => {
+                                    handleSelectNode(dn.node_id);
+                                    const el = document.getElementById(`node-view-${dn.node_id}`);
+                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                  }}
+                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border transition-all cursor-pointer ${
+                                    selectedNodeId === dn.node_id ? "border-amber-400" : "border-amber-900/45"
+                                  }`}
+                                >
+                                  {dn.concept_title}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Connected Nodes */}
+                        {focusNodesByGroup.strong.length > 0 && (
+                          <div className="space-y-1.5">
+                            <h5 className="text-[11px] font-sans text-slate-300 font-bold flex items-center gap-1">
+                              <span className="w-1 to-amber-500 h-1.5 bg-slate-500 rounded" /> Connected Lineage Nodes
+                            </h5>
+                            <div className="flex flex-wrap gap-1.5">
+                              {focusNodesByGroup.strong.map((sn) => (
+                                <button
+                                  key={sn.node_id}
+                                  onClick={() => {
+                                    handleSelectNode(sn.node_id);
+                                    const el = document.getElementById(`node-view-${sn.node_id}`);
+                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                  }}
+                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-slate-900/60 hover:bg-slate-800 text-slate-300 border transition-all cursor-pointer ${
+                                    selectedNodeId === sn.node_id ? "border-amber-600/50" : "border-slate-800"
+                                  }`}
+                                  title={sn.explanation}
+                                >
+                                  {sn.concept_title}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bridge Nodes */}
+                        {focusNodesByGroup.bridge.length > 0 && (
+                          <div className="space-y-1.5">
+                            <h5 className="text-[11px] font-sans text-teal-400 font-bold flex items-center gap-1">
+                              <span className="w-1 to-teal-400 h-1.5 bg-teal-500 rounded" /> Comparative Bridge Nodes
+                            </h5>
+                            <div className="flex flex-wrap gap-1.5">
+                              {focusNodesByGroup.bridge.map((bn) => (
+                                <button
+                                  key={bn.node_id}
+                                  onClick={() => {
+                                    handleSelectNode(bn.node_id);
+                                    const el = document.getElementById(`node-view-${bn.node_id}`);
+                                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                                  }}
+                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-teal-950/30 hover:bg-teal-900/20 text-teal-300 border transition-all cursor-pointer ${
+                                    selectedNodeId === bn.node_id ? "border-teal-500" : "border-teal-900/40"
+                                  }`}
+                                  title={bn.explanation}
+                                >
+                                  {bn.concept_title}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Study Path List Column */}
+                    {focusResult.studyPath && focusResult.studyPath.length > 0 && (
+                      <div className="space-y-2.5 pt-1.5 border-t border-slate-900">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Suggested Study Path Sequence:</span>
+                        <div className="flex flex-col gap-2">
+                          {focusResult.studyPath.map((pathItem, pIdx) => (
+                            <div
+                              key={pathItem.node_id}
+                              onClick={() => {
+                                handleSelectNode(pathItem.node_id);
+                                const el = document.getElementById(`node-view-${pathItem.node_id}`);
+                                if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                              }}
+                              className={`flex items-center gap-3 p-2.5 rounded border hover:border-amber-900/40 bg-[#12141d]/50 hover:bg-amber-950/10 cursor-pointer transition-all ${
+                                selectedNodeId === pathItem.node_id ? "border-amber-800/40 bg-amber-950/5 text-amber-300" : "border-slate-900 text-slate-300"
+                              }`}
+                            >
+                              <div className="w-5 h-5 rounded-full bg-[#1b1d28] border border-slate-800 hover:border-amber-800 flex items-center justify-center text-[10px] font-sans text-slate-500 font-bold shrink-0">
+                                {pIdx + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className={`text-xs font-semibold block truncate ${selectedNodeId === pathItem.node_id ? "text-amber-350" : "text-slate-200"}`}>
+                                  {pathItem.concept_title}
+                                </span>
+                                <span className="text-[9px] font-sans tracking-wide text-slate-500 uppercase block leading-none mt-0.5">
+                                  {pathItem.category}
+                                </span>
+                              </div>
+                              <ArrowRight size={12} className="text-slate-400" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {selectedNode ? (
                   <div>
                     {/* Active Selected Node Header Panel */}
@@ -1112,23 +1309,89 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
             </div>
 
             {/* Keyword Filter & Clearing HUD */}
-            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 justify-between">
+            <div className="flex flex-col gap-4">
               <p className="text-sm font-sans text-slate-350 leading-relaxed">
-                Expand concept nodes using recursive caret controllers. Click <strong className="text-amber-450">"Enrich"</strong> to query the theological engine to sprout specialized derivative sub-concepts.
+                Expand concept nodes using recursive caret controllers. Click <strong className="text-amber-440">"Enrich"</strong> to query the theological engine to sprout specialized derivative sub-concepts.
               </p>
 
               {activeKeyword && (
-                <div className="flex items-center justify-between bg-amber-950/20 border border-amber-900/40 px-3.5 py-2 rounded-lg flex-shrink-0">
-                  <div className="flex items-center gap-2 text-xs font-sans text-amber-500 font-medium">
-                    <Search className="w-4 h-4" />
-                    <span>Focus vector: <strong>[{activeKeyword}]</strong></span>
+                <div className="flex flex-col gap-3.5 bg-amber-950/15 border border-amber-900/35 p-5 rounded-lg space-y-1">
+                  {/* Semantic focus lens header */}
+                  <div className="flex flex-col gap-1 border-b border-amber-900/20 pb-2.5">
+                    <div className="flex items-center gap-2 text-sm font-sans text-amber-500 font-bold">
+                      <Search className="w-4.5 h-4.5" />
+                      <span>Focus vector: <strong className="bg-[#121319] text-amber-300 px-2 py-0.5 rounded border border-amber-900/40">[{activeKeyword}]</strong></span>
+                    </div>
+                    <span className="text-xs text-slate-400 font-sans pl-6 leading-relaxed">
+                      Viewing the graph through the {activeKeyword} lens: direct, connected, and bridge concepts.
+                    </span>
                   </div>
-                  <button
-                    onClick={() => setActiveKeyword(null)}
-                    className="text-amber-400 hover:text-amber-300 text-xs font-sans font-semibold ml-3 border-l border-amber-900/40 pl-3 cursor-pointer transition-colors"
-                  >
-                    Clear Filter
-                  </button>
+
+                  {/* Compact Navigator Strip */}
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mr-1">Navigate constellation:</span>
+                      
+                      {/* Direct Matches Nav */}
+                      <button
+                        onClick={() => handleScrollToFocusCategory("direct")}
+                        disabled={focusResult.directCount === 0}
+                        className="flex items-center gap-1.5 text-xs font-sans bg-amber-500/10 hover:bg-amber-500/20 text-amber-305 border border-amber-550/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        title="Scroll to first Direct match node"
+                      >
+                        <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+                        <span>Direct ({focusResult.directCount})</span>
+                      </button>
+
+                      {/* Connected Matches Nav */}
+                      <button
+                        onClick={() => handleScrollToFocusCategory("strong")}
+                        disabled={focusResult.strongCount === 0}
+                        className="flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/35 text-amber-400 border border-amber-805/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        title="Scroll to first Connected match node"
+                      >
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                        <span>Connected ({focusResult.strongCount})</span>
+                      </button>
+
+                      {/* Bridge Matches Nav */}
+                      <button
+                        onClick={() => handleScrollToFocusCategory("bridge")}
+                        disabled={focusResult.bridgeCount === 0}
+                        className="flex items-center gap-1.5 text-xs font-sans bg-teal-950/30 hover:bg-teal-900/30 text-teal-300 border border-teal-850/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        title="Scroll to first Bridge-concept node"
+                      >
+                        <span className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
+                        <span>Bridge ({focusResult.bridgeCount})</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3.5 flex-wrap">
+                      {/* Show focused constellation toggle */}
+                      <button
+                        onClick={() => setShowOnlyFocused((prev) => !prev)}
+                        className={`text-xs font-sans px-3.5 py-1.5 rounded-md border text-center transition-all cursor-pointer font-bold ${
+                          showOnlyFocused
+                            ? "bg-amber-500/20 border-amber-550 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.15)]"
+                            : "bg-[#14151e] hover:bg-slate-800 border-slate-750 text-slate-350"
+                        }`}
+                        title="Toggle view to only show nodes participating in the focused constellation"
+                      >
+                        {showOnlyFocused ? "✓ Isolate Constellation" : "Show Constellation Only"}
+                      </button>
+
+                      {/* Clear Focus button */}
+                      <button
+                        onClick={() => {
+                          setActiveKeyword(null);
+                          setShowOnlyFocused(false);
+                        }}
+                        className="text-slate-400 hover:text-red-400 text-xs font-sans font-semibold cursor-pointer border-l border-slate-750 pl-3.5 py-1 transition-colors"
+                      >
+                        Clear Focus
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1144,8 +1407,8 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
           {/* Topological Tree Render Area */}
           <div className="space-y-6 pb-12 flex-1">
-            {nodes.length > 0 ? (
-              nodes.map((node) => (
+            {renderedNodes.length > 0 ? (
+              renderedNodes.map((node) => (
                 <ConceptNodeView
                   key={node.node_id}
                   node={node}
@@ -1154,6 +1417,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                   onUpdateChildren={handleUpdateChildren}
                   selectedNodeId={selectedNodeId}
                   onSelectNode={handleSelectNode}
+                  indexedNodes={focusResult.indexedNodes}
                 />
               ))
             ) : (
