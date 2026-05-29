@@ -5,7 +5,6 @@ import {
   ChevronDown, 
   Wand2, 
   BookOpen,
-  Hash,
   Activity,
   Compass
 } from "lucide-react";
@@ -85,25 +84,26 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
   const classification = analysis ? analysis.classification : "none";
   const explanation = analysis ? analysis.explanation : "";
   const isSkeleton = showOnlyFocused && activeKeyword && classification === "unrelated";
+  const immersiveMode = readingMode || showOnlyFocused;
 
   if (isSkeleton) {
     return (
-      <div id={`node-view-${node.node_id}`} className="ml-4 md:ml-6 mb-1.5 border-l border-slate-800/10 pl-4 transition-all duration-300 opacity-20 hover:opacity-75">
+      <div id={`node-view-${node.node_id}`} className="ml-3 md:ml-5 mb-1 opacity-18 transition-all duration-300 hover:opacity-55">
         <div 
           onClick={handleSelect}
-          className="group relative flex items-center gap-2 py-1.5 px-2 rounded hover:bg-slate-900/10 cursor-pointer transition-all duration-150"
+          className="group relative flex items-center gap-2 py-0.5 pl-3 pr-2 border-l border-slate-800/20 cursor-pointer transition-all duration-150"
         >
           <button 
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(!expanded);
             }}
-            className="p-0.5 rounded text-slate-650 hover:text-slate-400 hover:bg-slate-900/30 flex items-center justify-center"
+            className="p-0 text-slate-700 hover:text-slate-400 flex items-center justify-center flex-shrink-0"
           >
-            {expanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+            {expanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
           </button>
-          <span className="text-slate-500 text-xs font-sans tracking-wide truncate">
-            {node.concept_title} <span className="text-slate-700 text-[9px] font-mono ml-1.5">(lineage rail)</span>
+          <span className="text-slate-500/90 text-[11px] font-sans tracking-wide truncate">
+            {node.concept_title}
           </span>
         </div>
 
@@ -257,10 +257,10 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
     <div id={`node-view-${node.node_id}`} className={outerClass}>
       <div 
         onClick={handleSelect}
-        className={`${cardClass} ${theme.glow}`}
+        className={`${cardClass} ${immersiveMode ? "" : theme.glow}`}
       >
         {/* Tradition Badge + Basic Stats Row */}
-        {!readingMode && (
+        {!immersiveMode && (
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs font-sans px-2.5 py-1 rounded-md border ${theme.badgeColor} tracking-normal font-medium`}>
@@ -287,8 +287,8 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
           </div>
         )}
 
-        {/* Minimal Category indicator under readingMode */}
-        {readingMode && badgeEl && (
+        {/* Minimal Category indicator in non-immersive view */}
+        {!immersiveMode && badgeEl && (
           <div className="flex items-center gap-2 mb-3">
             {badgeEl}
           </div>
@@ -319,21 +319,21 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button 
-              disabled={loading}
-              onClick={handleEnrich}
-              className={`flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/40 text-amber-400 hover:text-amber-300 border border-amber-900/50 px-3 py-1.5 rounded-md transition-all disabled:opacity-40 cursor-pointer ${
-                readingMode ? "opacity-70 hover:opacity-100" : ""
-              }`}
-              title="Query Gemini to expand theological derivatives"
-            >
-              {loading ? (
-                <div className="w-3.5 h-3.5 rounded-full border border-slate-700 border-t-amber-500 animate-spin" />
-              ) : (
-                <Wand2 size={13} />
-              )}
-              <span className="font-medium">{loading ? "Enriching" : "Enrich"}</span>
-            </button>
+            {!immersiveMode && (
+              <button 
+                disabled={loading}
+                onClick={handleEnrich}
+                className="flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/40 text-amber-400 hover:text-amber-300 border border-amber-900/50 px-3 py-1.5 rounded-md transition-all disabled:opacity-40 cursor-pointer"
+                title="Query Gemini to expand theological derivatives"
+              >
+                {loading ? (
+                  <div className="w-3.5 h-3.5 rounded-full border border-slate-700 border-t-amber-500 animate-spin" />
+                ) : (
+                  <Wand2 size={13} />
+                )}
+                <span className="font-medium">{loading ? "Enriching" : "Enrich"}</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -351,8 +351,8 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
           </div>
         )}
 
-        {!readingMode && explanationEl}
-        {readingMode && explanationEl && (
+        {!immersiveMode && explanationEl}
+        {immersiveMode && explanationEl && (
           <div className="mt-2.5 text-[10px] font-sans text-amber-400/80 italic flex items-center gap-1">
             <Compass size={10} className="text-amber-500 animate-[spin_12s_linear_infinite]" />
             <span>{explanation}</span>
@@ -366,7 +366,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
 
         {/* Detail Expansion Sub-Block */}
         <AnimatePresence>
-          {expanded && !readingMode && (
+          {expanded && !immersiveMode && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}

@@ -99,11 +99,6 @@ export default function App() {
     return focusNodesByGroup.direct.length + focusNodesByGroup.strong.length + focusNodesByGroup.bridge.length;
   }, [focusNodesByGroup, activeKeyword]);
 
-  const precisionRatio = useMemo(() => {
-    if (totalsObj.count === 0) return 0;
-    return visibleCount / totalsObj.count;
-  }, [visibleCount, totalsObj.count]);
-
   useEffect(() => {
     if (!activeKeyword) {
       setShowOnlyFocused(false);
@@ -332,7 +327,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
   };
 
   // Recursive finder
-  const findNodeById = (nodeList: ConceptNode[], id: string): ConceptNode | null => {
+  function findNodeById(nodeList: ConceptNode[], id: string): ConceptNode | null {
     for (const node of nodeList) {
       if (node.node_id === id) return node;
       if (node.children && node.children.length > 0) {
@@ -341,7 +336,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
       }
     }
     return null;
-  };
+  }
 
   const selectedNode = selectedNodeId ? findNodeById(nodes, selectedNodeId) : null;
 
@@ -644,6 +639,11 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
   };
 
   const totalsObj = getTotals(nodes);
+  const precisionRatio = useMemo(() => {
+    if (totalsObj.count === 0) return 0;
+    return visibleCount / totalsObj.count;
+  }, [visibleCount, totalsObj.count]);
+  const immersiveFocusMode = readingMode || showOnlyFocused;
 
   return (
     <div className="min-h-screen bg-[#0b0c11] text-slate-200 font-sans selection:bg-amber-950/70 selection:text-amber-200 flex flex-col antialiased">
@@ -1367,12 +1367,14 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
             {/* Keyword Filter & Clearing HUD */}
             <div className="flex flex-col gap-4">
-              <p className="text-sm font-sans text-slate-350 leading-relaxed">
-                Expand concept nodes using recursive caret controllers. Click <strong className="text-amber-440">"Enrich"</strong> to query the theological engine to sprout specialized derivative sub-concepts.
-              </p>
+              {!immersiveFocusMode && (
+                <p className="text-sm font-sans text-slate-350 leading-relaxed">
+                  Expand concept nodes using recursive caret controllers. Click <strong className="text-amber-440">"Enrich"</strong> to query the theological engine to sprout specialized derivative sub-concepts.
+                </p>
+              )}
 
               {activeKeyword && (
-                <div className="flex flex-col gap-3.5 bg-amber-950/15 border border-amber-900/35 p-5 rounded-lg space-y-1">
+                <div className={`flex flex-col gap-3.5 bg-amber-950/15 border border-amber-900/35 rounded-lg space-y-1 ${immersiveFocusMode ? "p-4" : "p-5"}`}>
                   {/* Semantic focus lens header */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-amber-900/20 pb-2.5">
                     <div className="flex flex-col gap-1">
@@ -1380,41 +1382,50 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                         <Search className="w-4.5 h-4.5" />
                         <span>Focus vector: <strong className="bg-[#121319] text-amber-300 px-2 py-0.5 rounded border border-amber-900/40">[{activeKeyword}]</strong></span>
                       </div>
-                      <span className="text-xs text-slate-400 font-sans pl-6 leading-relaxed">
-                        Viewing the graph through the {activeKeyword} lens: direct, connected, and bridge concepts.
-                      </span>
+                      {!immersiveFocusMode && (
+                        <span className="text-xs text-slate-400 font-sans pl-6 leading-relaxed">
+                          Viewing the graph through the {activeKeyword} lens: direct, connected, and bridge concepts.
+                        </span>
+                      )}
                     </div>
 
                     {/* Precision HUD */}
                     <div className="flex flex-col items-end text-xs font-sans text-slate-400 bg-[#0f1118]/60 p-2.5 rounded border border-slate-800/80 shrink-0">
-                      <div>
-                        Constellation Precision: <strong className="text-amber-405 font-semibold">{visibleCount}</strong> of <strong className="text-slate-300">{totalsObj.count}</strong> visible
+                      <div className="flex items-center gap-2">
+                        <span className="uppercase tracking-wider text-[10px] text-slate-500">Precision</span>
+                        <strong className="text-amber-405 font-semibold">{visibleCount}</strong>
+                        <span>/</span>
+                        <strong className="text-slate-300">{totalsObj.count}</strong>
                       </div>
-                      <div className="mt-1 flex items-center gap-1.5">
-                        <span>Lens precision:</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                          precisionRatio <= 0.35 
-                            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/35"
-                            : precisionRatio <= 0.65
-                              ? "bg-amber-950/40 text-amber-450 border border-amber-900/35"
-                              : "bg-rose-950/40 text-rose-455 border border-rose-900/35"
-                        }`}>
-                          {precisionRatio <= 0.35 ? "narrow" : precisionRatio <= 0.65 ? "medium" : "broad"}
-                        </span>
-                      </div>
+                      {!immersiveFocusMode && (
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <span>Lens precision:</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                            precisionRatio <= 0.35 
+                              ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/35"
+                              : precisionRatio <= 0.65
+                                ? "bg-amber-950/40 text-amber-450 border border-amber-900/35"
+                                : "bg-rose-950/40 text-rose-455 border border-rose-900/35"
+                          }`}>
+                            {precisionRatio <= 0.35 ? "narrow" : precisionRatio <= 0.65 ? "medium" : "broad"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
                   {/* Compact Navigator Strip */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+                  <div className={`flex flex-wrap items-center justify-between gap-4 pt-1 ${immersiveFocusMode ? "text-[11px]" : ""}`}>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mr-1">Navigate constellation:</span>
+                      {!immersiveFocusMode && (
+                        <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mr-1">Navigate constellation:</span>
+                      )}
                       
                       {/* Direct Matches Nav */}
                       <button
                         onClick={() => handleScrollToFocusCategory("direct")}
                         disabled={focusResult.directCount === 0}
-                        className="flex items-center gap-1.5 text-xs font-sans bg-amber-500/10 hover:bg-amber-500/20 text-amber-305 border border-amber-550/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        className={`flex items-center gap-1.5 text-xs font-sans bg-amber-500/10 hover:bg-amber-500/20 text-amber-305 border border-amber-550/30 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium ${immersiveFocusMode ? "px-2.5 py-1" : "px-3 py-1.5"}`}
                         title="Scroll to first Direct match node"
                       >
                         <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
@@ -1425,7 +1436,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                       <button
                         onClick={() => handleScrollToFocusCategory("strong")}
                         disabled={focusResult.strongCount === 0}
-                        className="flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/35 text-amber-400 border border-amber-805/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        className={`flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/35 text-amber-400 border border-amber-805/30 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium ${immersiveFocusMode ? "px-2.5 py-1" : "px-3 py-1.5"}`}
                         title="Scroll to first Connected match node"
                       >
                         <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
@@ -1436,7 +1447,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                       <button
                         onClick={() => handleScrollToFocusCategory("bridge")}
                         disabled={focusResult.bridgeCount === 0}
-                        className="flex items-center gap-1.5 text-xs font-sans bg-teal-950/30 hover:bg-teal-900/30 text-teal-300 border border-teal-850/30 px-3 py-1.5 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium"
+                        className={`flex items-center gap-1.5 text-xs font-sans bg-teal-950/30 hover:bg-teal-900/30 text-teal-300 border border-teal-850/30 rounded-md cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors font-medium ${immersiveFocusMode ? "px-2.5 py-1" : "px-3 py-1.5"}`}
                         title="Scroll to first Bridge-concept node"
                       >
                         <span className="w-1.5 h-1.5 bg-teal-400 rounded-full" />
