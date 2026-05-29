@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { initialNodes } from "./data";
 import { ConceptNode } from "./types";
 import { ConceptNodeView } from "./components/ConceptNodeView";
-import { analyzeFocusVector, filterFocusedTree } from "./utils/focusAnalysis";
+import { analyzeFocusVector, filterFocusedTree, sanitizeBengaliText } from "./utils/focusAnalysis";
 import ReactMarkdown from "react-markdown";
 import { 
   initializeFirebaseWithRetries, 
@@ -57,6 +57,7 @@ export default function App() {
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [showOnlyFocused, setShowOnlyFocused] = useState(false);
+  const [readingMode, setReadingMode] = useState(false);
 
   // Compute focus analysis for concept-lens
   const focusResult = useMemo(() => {
@@ -76,13 +77,32 @@ export default function App() {
     const bridge: any[] = [];
     
     Object.values(focusResult.indexedNodes).forEach((idxNode) => {
-      if (idxNode.classification === "direct") direct.push(idxNode);
-      else if (idxNode.classification === "strong") strong.push(idxNode);
-      else if (idxNode.classification === "bridge") bridge.push(idxNode);
+      // Find matching node from nodes list to enrich title & category
+      const matchedNode = findNodeById(nodes, idxNode.node_id);
+      if (matchedNode) {
+        const enriched = {
+          ...idxNode,
+          concept_title: matchedNode.concept_title,
+          category: matchedNode.grouping_category
+        };
+        if (idxNode.classification === "direct") direct.push(enriched);
+        else if (idxNode.classification === "strong") strong.push(enriched);
+        else if (idxNode.classification === "bridge") bridge.push(enriched);
+      }
     });
     
     return { direct, strong, bridge };
-  }, [focusResult.indexedNodes]);
+  }, [focusResult.indexedNodes, nodes]);
+
+  const visibleCount = useMemo(() => {
+    if (!activeKeyword) return 0;
+    return focusNodesByGroup.direct.length + focusNodesByGroup.strong.length + focusNodesByGroup.bridge.length;
+  }, [focusNodesByGroup, activeKeyword]);
+
+  const precisionRatio = useMemo(() => {
+    if (totalsObj.count === 0) return 0;
+    return visibleCount / totalsObj.count;
+  }, [visibleCount, totalsObj.count]);
 
   useEffect(() => {
     if (!activeKeyword) {
@@ -235,11 +255,11 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
               const node = flat.find((n) => n.node_id === t.id);
               if (node) {
                 if (t.titleBn && !node.titleBn) {
-                  node.titleBn = t.titleBn;
+                  node.titleBn = sanitizeBengaliText(t.titleBn);
                   mutatedCount++;
                 }
                 if (t.quoteBn && node.text_fragments && node.text_fragments.length > 0 && !node.text_fragments[0].quoteBn) {
-                  node.text_fragments[0].quoteBn = t.quoteBn;
+                  node.text_fragments[0].quoteBn = sanitizeBengaliText(t.quoteBn);
                   mutatedCount++;
                 }
               }
@@ -948,30 +968,41 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                     </div>
 
                     {/* Target Constellation Nodes Group Grid */}
-                    <div className="space-y-3.5">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Focused Core Constellation:</span>
-                      <div className="grid grid-cols-1 gap-2.5">
+                    <div className="space-y-4">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Focused Core Constellation Explainer Desk:</span>
+                      
+                      <div className="space-y-4">
                         {/* Direct Nodes */}
                         {focusNodesByGroup.direct.length > 0 && (
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             <h5 className="text-[11px] font-sans text-amber-400 font-bold flex items-center gap-1">
-                              <span className="w-1 to-amber-500 h-2 bg-amber-550 rounded" /> Direct Target Nodes
+                              <span className="w-1 h-2 bg-amber-500 rounded" /> Direct Target Nodes
                             </h5>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="space-y-2">
                               {focusNodesByGroup.direct.map((dn) => (
-                                <button
+                                <div
                                   key={dn.node_id}
                                   onClick={() => {
                                     handleSelectNode(dn.node_id);
                                     const el = document.getElementById(`node-view-${dn.node_id}`);
                                     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                                   }}
-                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border transition-all cursor-pointer ${
-                                    selectedNodeId === dn.node_id ? "border-amber-400" : "border-amber-900/45"
+                                  className={`flex flex-col p-3.5 rounded border cursor-pointer transition-all hover:bg-[#151722] ${
+                                    selectedNodeId === dn.node_id ? "border-amber-400 bg-amber-955/20 shadow-md" : "border-slate-800 bg-[#121319]/45"
                                   }`}
                                 >
-                                  {dn.concept_title}
-                                </button>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-amber-305">
+                                      {dn.concept_title}
+                                    </span>
+                                    <span className="text-[9px] font-sans font-extrabold uppercase tracking-widest text-amber-500 bg-amber-950/40 px-1.5 py-0.2 rounded border border-amber-900/30">
+                                      Direct Match
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] font-sans text-slate-400 mt-1.5 leading-relaxed">
+                                    {dn.explanation}
+                                  </span>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -979,26 +1010,35 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
                         {/* Connected Nodes */}
                         {focusNodesByGroup.strong.length > 0 && (
-                          <div className="space-y-1.5">
-                            <h5 className="text-[11px] font-sans text-slate-300 font-bold flex items-center gap-1">
-                              <span className="w-1 to-amber-500 h-1.5 bg-slate-500 rounded" /> Connected Lineage Nodes
+                          <div className="space-y-2">
+                            <h5 className="text-[11px] font-sans text-amber-450/90 font-bold flex items-center gap-1">
+                              <span className="w-1 h-2 bg-amber-600 rounded" /> Connected Lineage Nodes
                             </h5>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="space-y-2">
                               {focusNodesByGroup.strong.map((sn) => (
-                                <button
+                                <div
                                   key={sn.node_id}
                                   onClick={() => {
                                     handleSelectNode(sn.node_id);
                                     const el = document.getElementById(`node-view-${sn.node_id}`);
                                     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                                   }}
-                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-slate-900/60 hover:bg-slate-800 text-slate-300 border transition-all cursor-pointer ${
-                                    selectedNodeId === sn.node_id ? "border-amber-600/50" : "border-slate-800"
+                                  className={`flex flex-col p-3.5 rounded border cursor-pointer transition-all hover:bg-[#151722] ${
+                                    selectedNodeId === sn.node_id ? "border-amber-600/50 bg-amber-950/10 shadow-md" : "border-slate-800 bg-[#121319]/45"
                                   }`}
-                                  title={sn.explanation}
                                 >
-                                  {sn.concept_title}
-                                </button>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-slate-200">
+                                      {sn.concept_title}
+                                    </span>
+                                    <span className="text-[9px] font-sans font-extrabold uppercase tracking-widest text-amber-550/90 bg-amber-955/20 px-1.5 py-0.2 rounded border border-amber-900/20">
+                                      Connected
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] font-sans text-slate-400 mt-1.5 leading-relaxed">
+                                    {sn.explanation}
+                                  </span>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -1006,26 +1046,35 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
                         {/* Bridge Nodes */}
                         {focusNodesByGroup.bridge.length > 0 && (
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             <h5 className="text-[11px] font-sans text-teal-400 font-bold flex items-center gap-1">
-                              <span className="w-1 to-teal-400 h-1.5 bg-teal-500 rounded" /> Comparative Bridge Nodes
+                              <span className="w-1 h-2 bg-teal-500 rounded" /> Comparative Bridge Nodes
                             </h5>
-                            <div className="flex flex-wrap gap-1.5">
+                            <div className="space-y-2">
                               {focusNodesByGroup.bridge.map((bn) => (
-                                <button
+                                <div
                                   key={bn.node_id}
                                   onClick={() => {
                                     handleSelectNode(bn.node_id);
                                     const el = document.getElementById(`node-view-${bn.node_id}`);
                                     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                                   }}
-                                  className={`text-xs font-sans px-2.5 py-1 rounded bg-teal-950/30 hover:bg-teal-900/20 text-teal-300 border transition-all cursor-pointer ${
-                                    selectedNodeId === bn.node_id ? "border-teal-500" : "border-teal-900/40"
+                                  className={`flex flex-col p-3.5 rounded border cursor-pointer transition-all hover:bg-[#13171e] ${
+                                    selectedNodeId === bn.node_id ? "border-teal-500 bg-teal-950/20 shadow-md" : "border-slate-800 bg-[#121319]/45"
                                   }`}
-                                  title={bn.explanation}
                                 >
-                                  {bn.concept_title}
-                                </button>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-teal-300">
+                                      {bn.concept_title}
+                                    </span>
+                                    <span className="text-[9px] font-sans font-extrabold uppercase tracking-widest text-teal-400 bg-teal-950/30 px-1.5 py-0.2 rounded border border-teal-900/30">
+                                      Bridge Node
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] font-sans text-slate-400 mt-1.5 leading-relaxed">
+                                    {bn.explanation}
+                                  </span>
+                                </div>
                               ))}
                             </div>
                           </div>
@@ -1035,7 +1084,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
                     {/* Study Path List Column */}
                     {focusResult.studyPath && focusResult.studyPath.length > 0 && (
-                      <div className="space-y-2.5 pt-1.5 border-t border-slate-900">
+                      <div className="space-y-2.5 pt-4 border-t border-slate-900">
                         <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Suggested Study Path Sequence:</span>
                         <div className="flex flex-col gap-2">
                           {focusResult.studyPath.map((pathItem, pIdx) => (
@@ -1046,22 +1095,27 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                                 const el = document.getElementById(`node-view-${pathItem.node_id}`);
                                 if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                               }}
-                              className={`flex items-center gap-3 p-2.5 rounded border hover:border-amber-900/40 bg-[#12141d]/50 hover:bg-amber-950/10 cursor-pointer transition-all ${
-                                selectedNodeId === pathItem.node_id ? "border-amber-800/40 bg-amber-950/5 text-amber-300" : "border-slate-900 text-slate-300"
+                              className={`flex items-center gap-3 p-3 rounded border hover:border-amber-900/40 bg-[#12141d]/50 hover:bg-amber-950/10 cursor-pointer transition-all ${
+                                selectedNodeId === pathItem.node_id ? "border-amber-800/45 bg-amber-955/5 text-amber-300 shadow-sm" : "border-slate-900 text-slate-300"
                               }`}
                             >
-                              <div className="w-5 h-5 rounded-full bg-[#1b1d28] border border-slate-800 hover:border-amber-800 flex items-center justify-center text-[10px] font-sans text-slate-500 font-bold shrink-0">
+                              <div className="w-5.5 h-5.5 rounded-full bg-[#1b1d28] border border-slate-800 hover:border-amber-800 flex items-center justify-center text-[10px] font-sans text-slate-500 font-bold shrink-0">
                                 {pIdx + 1}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <span className={`text-xs font-semibold block truncate ${selectedNodeId === pathItem.node_id ? "text-amber-350" : "text-slate-200"}`}>
-                                  {pathItem.concept_title}
-                                </span>
-                                <span className="text-[9px] font-sans tracking-wide text-slate-500 uppercase block leading-none mt-0.5">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-xs font-semibold block truncate ${selectedNodeId === pathItem.node_id ? "text-amber-350 font-bold" : "text-slate-205"}`}>
+                                    {pathItem.concept_title}
+                                  </span>
+                                  <span className="text-[8px] font-sans font-bold uppercase tracking-wider bg-amber-950/45 text-amber-450 border border-amber-900/30 px-1.5 py-0.2 rounded shrink-0">
+                                    {pathItem.pedagogical_role}
+                                  </span>
+                                </div>
+                                <span className="text-[9px] font-sans tracking-wide text-slate-500 uppercase block leading-none mt-1">
                                   {pathItem.category}
                                 </span>
                               </div>
-                              <ArrowRight size={12} className="text-slate-400" />
+                              <ArrowRight size={12} className="text-slate-500" />
                             </div>
                           ))}
                         </div>
@@ -1084,7 +1138,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                       </h2>
                       {selectedNode.titleBn && (
                         <p className="text-slate-400 text-xs md:text-sm font-sans mt-0.5 tracking-normal">
-                          {selectedNode.titleBn}
+                          {sanitizeBengaliText(selectedNode.titleBn)}
                         </p>
                       )}
                       
@@ -1108,14 +1162,17 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                           <div key={index} className="p-6 md:p-8 bg-[#141621] border border-slate-800 rounded-lg relative space-y-4">
                             <span className="absolute top-3 right-4 text-xs font-sans text-slate-500 font-semibold">EXTRACT #{index + 1}</span>
                             
-                            <blockquote className="text-slate-100 font-sans text-base md:text-lg leading-relaxed mb-4 text-left font-normal tracking-wide pl-4 border-l-4 border-amber-500/80">
-                              "{frag.fragment_content}"
-                            </blockquote>
-                            {frag.quoteBn && (
-                              <p className="text-slate-400 text-xs md:text-sm leading-relaxed mb-4 text-left font-normal italic pl-4 border-l-4 border-slate-700">
-                                "{frag.quoteBn}"
-                              </p>
-                            )}
+                            <div className="space-y-4 font-serif">
+                              <blockquote className="text-slate-100 text-lg md:text-xl leading-relaxed text-left font-normal tracking-normal pl-4 border-l-4 border-amber-500/85">
+                                "{frag.fragment_content}"
+                              </blockquote>
+                              {frag.quoteBn && (
+                                <div className="text-slate-200/90 text-base md:text-lg leading-relaxed text-left font-normal pl-4 border-l-4 border-teal-850/80 mt-3 pt-1">
+                                  <span className="text-[10px] font-sans font-semibold tracking-wider text-teal-400 block uppercase mb-1">Bengali Translation / Parallel Extract:</span>
+                                  <p className="italic">"{sanitizeBengaliText(frag.quoteBn)}"</p>
+                                </div>
+                              )}
+                            </div>
 
                             <div className="border-t border-slate-800/60 pt-3 flex flex-wrap items-center justify-between gap-3 text-xs font-sans text-slate-400">
                               <div className="flex items-center gap-1.5 text-slate-200 font-semibold">
@@ -1317,14 +1374,35 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
               {activeKeyword && (
                 <div className="flex flex-col gap-3.5 bg-amber-950/15 border border-amber-900/35 p-5 rounded-lg space-y-1">
                   {/* Semantic focus lens header */}
-                  <div className="flex flex-col gap-1 border-b border-amber-900/20 pb-2.5">
-                    <div className="flex items-center gap-2 text-sm font-sans text-amber-500 font-bold">
-                      <Search className="w-4.5 h-4.5" />
-                      <span>Focus vector: <strong className="bg-[#121319] text-amber-300 px-2 py-0.5 rounded border border-amber-900/40">[{activeKeyword}]</strong></span>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-amber-900/20 pb-2.5">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-sm font-sans text-amber-500 font-bold">
+                        <Search className="w-4.5 h-4.5" />
+                        <span>Focus vector: <strong className="bg-[#121319] text-amber-300 px-2 py-0.5 rounded border border-amber-900/40">[{activeKeyword}]</strong></span>
+                      </div>
+                      <span className="text-xs text-slate-400 font-sans pl-6 leading-relaxed">
+                        Viewing the graph through the {activeKeyword} lens: direct, connected, and bridge concepts.
+                      </span>
                     </div>
-                    <span className="text-xs text-slate-400 font-sans pl-6 leading-relaxed">
-                      Viewing the graph through the {activeKeyword} lens: direct, connected, and bridge concepts.
-                    </span>
+
+                    {/* Precision HUD */}
+                    <div className="flex flex-col items-end text-xs font-sans text-slate-400 bg-[#0f1118]/60 p-2.5 rounded border border-slate-800/80 shrink-0">
+                      <div>
+                        Constellation Precision: <strong className="text-amber-405 font-semibold">{visibleCount}</strong> of <strong className="text-slate-300">{totalsObj.count}</strong> visible
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <span>Lens precision:</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                          precisionRatio <= 0.35 
+                            ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/35"
+                            : precisionRatio <= 0.65
+                              ? "bg-amber-950/40 text-amber-450 border border-amber-900/35"
+                              : "bg-rose-950/40 text-rose-455 border border-rose-900/35"
+                        }`}>
+                          {precisionRatio <= 0.35 ? "narrow" : precisionRatio <= 0.65 ? "medium" : "broad"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Compact Navigator Strip */}
@@ -1367,6 +1445,19 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                     </div>
 
                     <div className="flex items-center gap-3.5 flex-wrap">
+                      {/* Quiet Reading Mode Toggle */}
+                      <button
+                        onClick={() => setReadingMode((prev) => !prev)}
+                        className={`text-xs font-sans px-3.5 py-1.5 rounded-md border text-center transition-all cursor-pointer font-bold ${
+                          readingMode
+                            ? "bg-amber-500/20 border-amber-550 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.15)]"
+                            : "bg-[#14151e] hover:bg-slate-800 border-slate-750 text-slate-350"
+                        }`}
+                        title="Toggle serene text-forward reading view"
+                      >
+                        {readingMode ? "✓ Reading Mode" : "Quiet Reading Mode"}
+                      </button>
+
                       {/* Show focused constellation toggle */}
                       <button
                         onClick={() => setShowOnlyFocused((prev) => !prev)}
@@ -1385,6 +1476,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                         onClick={() => {
                           setActiveKeyword(null);
                           setShowOnlyFocused(false);
+                          setReadingMode(false);
                         }}
                         className="text-slate-400 hover:text-red-400 text-xs font-sans font-semibold cursor-pointer border-l border-slate-750 pl-3.5 py-1 transition-colors"
                       >
@@ -1408,19 +1500,20 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
           {/* Topological Tree Render Area */}
           <div className="space-y-6 pb-12 flex-1">
             {renderedNodes.length > 0 ? (
-              renderedNodes.map((node) => (
-                <ConceptNodeView
-                  key={node.node_id}
-                  node={node}
-                  activeKeyword={activeKeyword}
-                  onKeywordClick={handleKeywordClick}
-                  onUpdateChildren={handleUpdateChildren}
-                  selectedNodeId={selectedNodeId}
-                  onSelectNode={handleSelectNode}
-                  indexedNodes={focusResult.indexedNodes}
-                  showOnlyFocused={showOnlyFocused}
-                />
-              ))
+            renderedNodes.map((node) => (
+              <ConceptNodeView
+                key={node.node_id}
+                node={node}
+                activeKeyword={activeKeyword}
+                onKeywordClick={handleKeywordClick}
+                onUpdateChildren={handleUpdateChildren}
+                selectedNodeId={selectedNodeId}
+                onSelectNode={handleSelectNode}
+                indexedNodes={focusResult.indexedNodes}
+                showOnlyFocused={showOnlyFocused}
+                readingMode={readingMode}
+              />
+            ))
             ) : (
               <div className="text-center py-20 border border-dashed border-slate-800 rounded-lg bg-[#11121c]">
                 <Loader2 className="animate-spin text-slate-500 w-8 h-8 mx-auto mb-4" />

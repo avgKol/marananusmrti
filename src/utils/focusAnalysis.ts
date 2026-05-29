@@ -15,7 +15,7 @@ export interface FocusAnalysisResult {
   bridgeCount: number;
   unrelatedCount: number;
   conceptSummary: string;
-  studyPath: Array<{ node_id: string; concept_title: string; category: string }>;
+  studyPath: Array<{ node_id: string; concept_title: string; category: string; pedagogical_role: string }>;
 }
 
 /**
@@ -392,10 +392,12 @@ export function analyzeFocusVector(
     }
   });
 
-  const studyPath = curatedPath.slice(0, 5).map(item => ({
+  const stages = ["Foundation", "Lineage", "Friction", "Bridge", "Synthesis"];
+  const studyPath = curatedPath.slice(0, 5).map((item, index) => ({
     node_id: item.node.node_id,
     concept_title: item.node.concept_title,
-    category: item.node.grouping_category
+    category: item.node.grouping_category,
+    pedagogical_role: stages[index] || "Synthesis"
   }));
 
   return {
@@ -454,4 +456,57 @@ export function filterFocusedTree(nodes: ConceptNode[], indexedNodes: Record<str
       return null;
     })
     .filter((n): n is ConceptNode => n !== null);
+}
+
+/**
+ * Defensively sanitizes Bengali translations (titleBn, quoteBn) to strip out LLM prompt leakage,
+ * bracketed English translations, and meta-instructions before rendering or saving.
+ */
+export function sanitizeBengaliText(text: string | undefined | null): string {
+  if (!text) return "";
+  
+  let cleaned = text.trim();
+  
+  // 1. Remove bracketed or parenthesized English translations or explanations, e.g. [English translation]
+  cleaned = cleaned.replace(/\[[^\]]*[a-zA-Z]{2,}[^\]]*\]/g, "");
+  cleaned = cleaned.replace(/\([^)]*[a-zA-Z]{2,}[^)]*\)/g, "");
+
+  // 2. Remove standard LLM prompt leakage phrases (case-insensitive)
+  const leakagePatterns = [
+    /here is the translation:?/gi,
+    /direct translation:?/gi,
+    /note:?/gi,
+    /translated as:?/gi,
+    /let's provide translation directly:?/gi,
+    /let's provide translation:?/gi,
+    /translation:?/gi,
+    /philosophical concept:?/gi
+  ];
+  
+  leakagePatterns.forEach(pattern => {
+    cleaned = cleaned.replace(pattern, "");
+  });
+
+  // 3. Remove trailing/leading arrow tags or meta-instructions
+  cleaned = cleaned.replace(/->\s*[a-zA-Z\s,.:\-!?()]+/g, "");
+  cleaned = cleaned.replace(/[a-zA-Z\s,.:\-!?()'"◇◈⌁\/\\]+->/g, "");
+
+  // 4. Split and filter out lines that are purely English (prompt leftovers)
+  cleaned = cleaned.split("\n").map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    const englishCharCount = (trimmed.match(/[a-zA-Z]/g) || []).length;
+    const totalCharCount = trimmed.length;
+    const hasBengali = /[\u0980-\u09FF]/.test(trimmed);
+    // If a line is mostly English and has no Bengali characters, strip it
+    if (totalCharCount > 3 && (englishCharCount / totalCharCount > 0.5) && !hasBengali) {
+      return "";
+    }
+    return trimmed;
+  }).filter(line => line.length > 0).join("\n");
+
+  // 5. Clean up leading/trailing colons, dashes, slashes, brackets, and extra whitespace
+  cleaned = cleaned.replace(/^[:\-\s\/\\]+/, "").replace(/[:\-\s\/\\]+$/, "");
+
+  return cleaned.trim();
 }

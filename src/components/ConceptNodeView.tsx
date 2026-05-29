@@ -10,6 +10,7 @@ import {
   Compass
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { sanitizeBengaliText } from "../utils/focusAnalysis";
 
 interface ConceptNodeProps {
   node: ConceptNode;
@@ -21,6 +22,7 @@ interface ConceptNodeProps {
   onSuggestedClick?: (conceptName: string) => void;
   indexedNodes?: Record<string, any>;
   showOnlyFocused?: boolean;
+  readingMode?: boolean;
 }
 
 export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
@@ -33,6 +35,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
   onSuggestedClick,
   indexedNodes,
   showOnlyFocused,
+  readingMode = false,
 }) => {
   const [expanded, setExpanded] = useState(true); // Default parent nodes to expanded for structural visibility
   const [loading, setLoading] = useState(false);
@@ -85,39 +88,33 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
 
   if (isSkeleton) {
     return (
-      <div id={`node-view-${node.node_id}`} className="ml-4 md:ml-8 mb-3 border-l border-slate-900/30 pl-4 md:pl-6 transition-all duration-300 opacity-25 hover:opacity-80">
+      <div id={`node-view-${node.node_id}`} className="ml-4 md:ml-6 mb-1.5 border-l border-slate-800/10 pl-4 transition-all duration-300 opacity-20 hover:opacity-75">
         <div 
           onClick={handleSelect}
-          className="group relative flex items-center justify-between p-3 rounded-lg border border-slate-900 bg-slate-950/10 cursor-pointer transition-all duration-200"
+          className="group relative flex items-center gap-2 py-1.5 px-2 rounded hover:bg-slate-900/10 cursor-pointer transition-all duration-150"
         >
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-              className="p-1 rounded bg-[#13141a] hover:bg-[#1a1b24] transition-colors text-slate-500 flex items-center justify-center animate-none"
-            >
-              {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
-            <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-sans font-medium tracking-wide">
-                {node.concept_title} <span className="text-slate-600 text-[10px] font-mono ml-2">(Structural Lineage)</span>
-              </span>
-            </div>
-          </div>
-          
-          <span className="text-[10px] font-sans text-slate-600">Collapsed</span>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+            className="p-0.5 rounded text-slate-650 hover:text-slate-400 hover:bg-slate-900/30 flex items-center justify-center"
+          >
+            {expanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+          </button>
+          <span className="text-slate-500 text-xs font-sans tracking-wide truncate">
+            {node.concept_title} <span className="text-slate-700 text-[9px] font-mono ml-1.5">(lineage rail)</span>
+          </span>
         </div>
 
         {/* Render children recursively */}
         <AnimatePresence>
           {expanded && hasChildren && (
             <motion.div 
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              className="mt-2 space-y-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-1 space-y-1"
             >
               {node.children!.map((child) => (
                 <ConceptNodeView
@@ -131,6 +128,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
                   onSuggestedClick={onSuggestedClick}
                   indexedNodes={indexedNodes}
                   showOnlyFocused={showOnlyFocused}
+                  readingMode={readingMode}
                 />
               ))}
             </motion.div>
@@ -199,11 +197,11 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
     if (classification === "direct") {
       outerClass += "border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.15)]";
       cardClass += isSelected 
-        ? "border-amber-400 bg-[#161722] shadow-[0_4px_20px_rgba(245,158,11,0.12)] animate-[pulse_3s_infinite]" 
+        ? `border-amber-400 bg-[#161722] shadow-[0_4px_20px_rgba(245,158,11,0.12)] ${readingMode ? "" : "animate-[pulse_4s_infinite]"}` 
         : "border-amber-500 bg-[#12131b] shadow-[0_2px_12px_rgba(245,158,11,0.06)]";
       badgeEl = (
         <span className="text-[10px] font-sans font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-550/80 px-2.5 py-0.5 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.25)] flex items-center gap-1 shrink-0">
-          <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+          <span className={`w-1.5 h-1.5 bg-amber-400 rounded-full ${readingMode ? "" : "animate-pulse"}`} />
           Direct
         </span>
       );
@@ -262,30 +260,39 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
         className={`${cardClass} ${theme.glow}`}
       >
         {/* Tradition Badge + Basic Stats Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-xs font-sans px-2.5 py-1 rounded-md border ${theme.badgeColor} tracking-normal font-medium`}>
-              {theme.name}
-            </span>
-            {badgeEl}
-            <span className="text-xs font-sans text-slate-450 font-medium truncate max-w-[200px]">
-              {node.grouping_category}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs font-sans text-slate-300">
-            <span className="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">
-              <BookOpen size={13} className="text-slate-400" />
-              <span>{fragmentCount} extracts</span>
-            </span>
-            {childCount > 0 && (
-              <span className="flex items-center gap-1.5 text-amber-400 font-semibold bg-amber-950/40 border border-amber-850 px-2.5 py-1 rounded-md">
-                <Compass size={13} className="text-amber-500" />
-                <span>{childCount} {childCount === 1 ? "branch" : "branches"}</span>
+        {!readingMode && (
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-xs font-sans px-2.5 py-1 rounded-md border ${theme.badgeColor} tracking-normal font-medium`}>
+                {theme.name}
               </span>
-            )}
+              {badgeEl}
+              <span className="text-xs font-sans text-slate-455 font-medium truncate max-w-[200px]">
+                {node.grouping_category}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 text-xs font-sans text-slate-300">
+              <span className="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1 rounded-md border border-slate-800">
+                <BookOpen size={13} className="text-slate-400" />
+                <span>{fragmentCount} extracts</span>
+              </span>
+              {childCount > 0 && (
+                <span className="flex items-center gap-1.5 text-amber-400 font-semibold bg-amber-950/40 border border-amber-850 px-2.5 py-1 rounded-md">
+                  <Compass size={13} className="text-amber-500" />
+                  <span>{childCount} {childCount === 1 ? "branch" : "branches"}</span>
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Minimal Category indicator under readingMode */}
+        {readingMode && badgeEl && (
+          <div className="flex items-center gap-2 mb-3">
+            {badgeEl}
+          </div>
+        )}
 
         {/* Title & Interaction Headings */}
         <div className="flex items-center justify-between gap-4">
@@ -300,12 +307,12 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
               {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
             </button>
             <div className="flex flex-col">
-              <h3 className={`font-sans font-semibold text-lg md:text-xl transition-colors ${isSelected ? "text-amber-300" : "text-slate-100 group-hover:text-white"}`}>
+              <h3 className={`font-sans font-semibold text-lg md:text-xl transition-colors ${isSelected ? "text-amber-305 font-bold" : "text-slate-100 group-hover:text-white"}`}>
                 {node.concept_title}
               </h3>
               {node.titleBn && (
                 <span className="text-slate-400 text-xs md:text-sm font-sans mt-0.5 tracking-normal">
-                  {node.titleBn}
+                  {sanitizeBengaliText(node.titleBn)}
                 </span>
               )}
             </div>
@@ -315,7 +322,9 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
             <button 
               disabled={loading}
               onClick={handleEnrich}
-              className="flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/40 text-amber-400 hover:text-amber-300 border border-amber-900/50 px-3 py-1.5 rounded-md transition-all disabled:opacity-40 cursor-pointer"
+              className={`flex items-center gap-1.5 text-xs font-sans bg-amber-950/30 hover:bg-amber-900/40 text-amber-400 hover:text-amber-300 border border-amber-900/50 px-3 py-1.5 rounded-md transition-all disabled:opacity-40 cursor-pointer ${
+                readingMode ? "opacity-70 hover:opacity-100" : ""
+              }`}
               title="Query Gemini to expand theological derivatives"
             >
               {loading ? (
@@ -330,19 +339,25 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
 
         {/* Sub-Concept Description Summary */}
         {node.text_fragments && node.text_fragments.length > 0 && (
-          <div className="mt-3 border-l-2 border-slate-700 pl-3 flex flex-col gap-1.5">
-            <p className="text-slate-300 text-sm leading-relaxed font-normal">
+          <div className="mt-3.5 border-l-2 border-slate-750 pl-3.5 flex flex-col gap-2 font-serif">
+            <p className="text-slate-205 text-sm md:text-base leading-relaxed font-normal">
               "{node.text_fragments[0].fragment_content}"
             </p>
             {node.text_fragments[0].quoteBn && (
-              <p className="text-slate-400/90 text-xs leading-relaxed font-normal italic">
-                "{node.text_fragments[0].quoteBn}"
+              <p className="text-slate-400 text-xs md:text-sm leading-relaxed font-normal italic">
+                "{sanitizeBengaliText(node.text_fragments[0].quoteBn)}"
               </p>
             )}
           </div>
         )}
 
-        {explanationEl}
+        {!readingMode && explanationEl}
+        {readingMode && explanationEl && (
+          <div className="mt-2.5 text-[10px] font-sans text-amber-400/80 italic flex items-center gap-1">
+            <Compass size={10} className="text-amber-500 animate-[spin_12s_linear_infinite]" />
+            <span>{explanation}</span>
+          </div>
+        )}
 
         {/* Selected Highlight Strip */}
         {isSelected && (
@@ -351,7 +366,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
 
         {/* Detail Expansion Sub-Block */}
         <AnimatePresence>
-          {expanded && (
+          {expanded && !readingMode && (
             <motion.div 
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -424,6 +439,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
                 onSuggestedClick={onSuggestedClick}
                 indexedNodes={indexedNodes}
                 showOnlyFocused={showOnlyFocused}
+                readingMode={readingMode}
               />
             ))}
           </motion.div>
