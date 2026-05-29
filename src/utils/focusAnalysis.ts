@@ -93,19 +93,63 @@ export function analyzeFocusVector(
     return descendants;
   };
 
-  // 2. Identify Direct Matches and collect keyword pool
+  // 2. Define generic/common terms and rare/high-value terms
+  const genericTerms = new Set([
+    "death", "mortal", "body", "self", "impermanence", "comparative", 
+    "liberation", "vedanta", "buddhism", "atman", "mind"
+  ]);
+
+  const rareTerms = new Set([
+    "kali", "kala", "shakti", "abhaya", "sakshi", "ramakrishna", "vivekananda", 
+    "mother", "destroyer", "fearlessness", "time", "destruction", "mahakali", "durga"
+  ]);
+
+  // Helper check for strict Direct Match
+  function checkIsDirect(node: ConceptNode, focusLower: string, genericTerms: Set<string>): boolean {
+    const keywordsLower = node.keywords.map(k => k.toLowerCase());
+    const hasExactKeyword = keywordsLower.includes(focusLower);
+    const hasTitleMatch = node.concept_title.toLowerCase().includes(focusLower);
+
+    let hasBengaliMatch = false;
+    if (node.titleBn) {
+      const bn = node.titleBn.toLowerCase();
+      const translationMap: Record<string, string[]> = {
+        kali: ["কালী", "কাল", "মহাকালী"],
+        kala: ["কাল", "মহাকাল"],
+        shakti: ["শক্তি"],
+        abhaya: ["অভয়", "ভয়হীনতা"],
+        sakshi: ["সাক্ষী", "সাক্ষি"],
+        atman: ["আত্মা", "আত্মন"],
+        maranasati: ["মরণাসতি"],
+        marananusmrti: ["মরণানুস্মৃতি"],
+        destruction: ["ধ্বংস", "বিনাশ"],
+        fearlessness: ["ভয়হীনতা", "অভয়"]
+      };
+      const mapped = translationMap[focusLower] || [];
+      hasBengaliMatch = mapped.some(term => bn.includes(term));
+    }
+
+    let hasTextMatch = false;
+    const isGeneric = genericTerms.has(focusLower);
+    if (isGeneric) {
+      // Stringent word boundary match for generic terms in extracts to avoid over-matching
+      const regex = new RegExp(`\\b${focusLower}\\b`, 'i');
+      hasTextMatch = node.text_fragments.some(f => regex.test(f.fragment_content));
+    } else {
+      // Substring is fine for specific, rare concepts
+      hasTextMatch = node.text_fragments.some(f => f.fragment_content.toLowerCase().includes(focusLower));
+    }
+
+    return hasExactKeyword || hasTitleMatch || hasBengaliMatch || hasTextMatch;
+  }
+
+  // 3. Identify Direct Matches and collect keyword pool
   const directNodes: ConceptNode[] = [];
   const directNodeIds = new Set<string>();
   const directKeywords = new Set<string>();
 
   flatNodesList.forEach(node => {
-    const titleMatch = node.concept_title.toLowerCase().includes(focusLower);
-    const kwMatch = node.keywords.some(kw => kw.toLowerCase() === focusLower);
-    const textMatch = node.text_fragments.some(f =>
-      f.fragment_content.toLowerCase().includes(focusLower)
-    );
-
-    if (kwMatch || titleMatch || textMatch) {
+    if (checkIsDirect(node, focusLower, genericTerms)) {
       directNodes.push(node);
       directNodeIds.add(node.node_id);
       node.keywords.forEach(kw => {
@@ -123,16 +167,7 @@ export function analyzeFocusVector(
   let bridgeCount = 0;
   let unrelatedCount = 0;
 
-  // Bridge vocabulary definitions
-  const bridgeVocabulary = [
-    "death", "mortal", "fearless", "abhaya", "witness", "sakshi", "shakti", 
-    "body", "deha", "ego", "self", "anatta", "comparative", "buddha", 
-    "vedanta", "kali", "destruction", "cessation", "liberation", 
-    "immortality", "undying", "viveka", "mind", "atman", "skandha", 
-    "impermanence", "sreya", "preya"
-  ];
-
-  // 3. Perform categorization for every node
+  // 4. Perform weighted scoring and classification for every node
   flatNodesList.forEach(node => {
     const nodeId = node.node_id;
 
@@ -140,11 +175,11 @@ export function analyzeFocusVector(
     if (directNodeIds.has(nodeId)) {
       // Direct Match
       directCount++;
-      let explain = `Direct match for keyword #${focusConcept}`;
+      let explain = `Explicit #${focusConcept} node via keyword/theme`;
       if (node.concept_title.toLowerCase().includes(focusLower)) {
-        explain = `Title mentions focus concept: "${focusConcept}"`;
+        explain = `Explicit title mention of focus concept: "${node.concept_title}"`;
       } else if (node.text_fragments.some(f => f.fragment_content.toLowerCase().includes(focusLower))) {
-        explain = `Source extract references: "${focusConcept}"`;
+        explain = `Extract explicitly discusses: "${focusConcept}"`;
       }
 
       indexedNodes[nodeId] = {
@@ -155,121 +190,150 @@ export function analyzeFocusVector(
       return;
     }
 
-    // Check Strong Connection:
-    // a) parent / child / ancestor / descendant of any direct node
-    let relativeDirectNode: ConceptNode | null = null;
-    let relatType: "parent" | "child" | "ancestor" | "descendant" | null = null;
+    // scoring system for connected & bridge
+    let score = 0;
+    const explanations: string[] = [];
+
+    // A. Structural relationships
+    let isParentOfDirect = false;
+    let isChildOfDirect = false;
+    let isAncestorOfDirect = false;
+    let isDescendantOfDirect = false;
+    let relativeDirectTitle = "";
 
     for (const dNode of directNodes) {
       if (parentMap[nodeId] === dNode.node_id) {
-        relativeDirectNode = dNode;
-        relatType = "child";
+        isChildOfDirect = true;
+        relativeDirectTitle = dNode.concept_title;
         break;
       }
       if (parentMap[dNode.node_id] === nodeId) {
-        relativeDirectNode = dNode;
-        relatType = "parent";
-        break;
-      }
-      const ancestors = getAncestors(nodeId);
-      if (ancestors.includes(dNode.node_id)) {
-        relativeDirectNode = dNode;
-        relatType = "descendant";
-        break;
-      }
-      const descendants = getDescendants(nodeId);
-      if (descendants.includes(dNode.node_id)) {
-        relativeDirectNode = dNode;
-        relatType = "ancestor";
+        isParentOfDirect = true;
+        relativeDirectTitle = dNode.concept_title;
         break;
       }
     }
 
-    // b) shares keywords with direct keywords
+    if (!isParentOfDirect && !isChildOfDirect) {
+      for (const dNode of directNodes) {
+        if (getAncestors(nodeId).includes(dNode.node_id)) {
+          isDescendantOfDirect = true;
+          relativeDirectTitle = dNode.concept_title;
+          break;
+        }
+        if (getDescendants(nodeId).includes(dNode.node_id)) {
+          isAncestorOfDirect = true;
+          relativeDirectTitle = dNode.concept_title;
+          break;
+        }
+      }
+    }
+
+    if (isChildOfDirect) {
+      score += 35;
+      explanations.push(`Direct child of #${focusConcept} node ("${relativeDirectTitle}")`);
+    } else if (isParentOfDirect) {
+      score += 35;
+      explanations.push(`Direct parent of #${focusConcept} node ("${relativeDirectTitle}")`);
+    } else if (isDescendantOfDirect) {
+      score += 15;
+      explanations.push(`Descendant of direct-match "${relativeDirectTitle}"`);
+    } else if (isAncestorOfDirect) {
+      score += 15;
+      explanations.push(`Parent ancestor of direct-match "${relativeDirectTitle}"`);
+    }
+
+    // B. Keyword Overlap (Suppressed if generic)
+    const nodeKwsLower = node.keywords.map(k => k.toLowerCase());
     const sharedKws = node.keywords.filter(kw => directKeywords.has(kw.toLowerCase()));
+    
+    const importantShared = sharedKws.filter(kw => !genericTerms.has(kw.toLowerCase()));
+    const genericShared = sharedKws.filter(kw => genericTerms.has(kw.toLowerCase()));
 
-    if (relativeDirectNode && relatType) {
-      strongCount++;
-      let expMsg = "";
-      if (relatType === "child") {
-        expMsg = `Direct child of "${relativeDirectNode.concept_title}"`;
-      } else if (relatType === "parent") {
-        expMsg = `Direct parent of "${relativeDirectNode.concept_title}"`;
-      } else if (relatType === "descendant") {
-        expMsg = `Descendant of direct-match "${relativeDirectNode.concept_title}"`;
-      } else {
-        expMsg = `Ancestor of direct-match "${relativeDirectNode.concept_title}"`;
+    if (importantShared.length >= 2) {
+      score += 30;
+      explanations.push(`Shares key thematic terms: #${importantShared.slice(0, 2).join(", #")}`);
+    } else if (importantShared.length === 1) {
+      score += 15;
+      explanations.push(`Shares thematic keyword match: #${importantShared[0]}`);
+    }
+
+    // Suppressed generic overlap
+    if (genericShared.length > 0) {
+      score += Math.min(4, genericShared.length * 2); // maximum +4 weight contribution
+    }
+
+    // C. Rare/High-Value Keyword shared with Direct Nodes
+    const hasRareKey = node.keywords.some(kw => rareTerms.has(kw.toLowerCase()) && directKeywords.has(kw.toLowerCase()));
+    if (hasRareKey) {
+      const rareMatch = node.keywords.find(kw => rareTerms.has(kw.toLowerCase()) && directKeywords.has(kw.toLowerCase()));
+      score += 25;
+      explanations.push(`Connected through rare keyword: #${rareMatch}`);
+    }
+
+    // D. Comparative Bridge Connections
+    let bridgeExplanation = "";
+    if (focusLower === "kali" || focusLower === "shakti" || focusLower === "kala") {
+      const hasSakshi = nodeKwsLower.includes("sakshi") || node.concept_title.toLowerCase().includes("sakshi") || node.concept_title.toLowerCase().includes("witness") || node.text_fragments.some(f => f.fragment_content.toLowerCase().includes("witness"));
+      const hasAbhaya = nodeKwsLower.includes("abhaya") || node.concept_title.toLowerCase().includes("abhaya") || node.concept_title.toLowerCase().includes("fearless");
+      const hasAnatta = nodeKwsLower.includes("anatta") || nodeKwsLower.includes("skandhas") || node.concept_title.toLowerCase().includes("buddhist") || node.concept_title.toLowerCase().includes("deconstruction");
+      
+      if (hasSakshi) {
+        score += 15;
+        bridgeExplanation = "Bridge through Witness-consciousness / Sakshi as motionless observer of destruction";
+      } else if (hasAbhaya) {
+        score += 15;
+        bridgeExplanation = "Connected through fearlessness / Abhaya in Vivekananda's Kali framing";
+      } else if (hasAnatta) {
+        score += 15;
+        bridgeExplanation = "Bridge linking Buddhist deconstruction of form to Kali's destructive nature";
       }
+    } else if (focusLower === "sakshi" || focusLower === "witness") {
+      const hasKali = nodeKwsLower.includes("kali") || nodeKwsLower.includes("shakti") || node.concept_title.toLowerCase().includes("kali");
+      const hasAtman = nodeKwsLower.includes("atman") || nodeKwsLower.includes("self") || node.concept_title.toLowerCase().includes("atman");
 
-      indexedNodes[nodeId] = {
-        node_id: nodeId,
-        classification: "strong",
-        explanation: expMsg
-      };
-      return;
-    }
-
-    if (sharedKws.length > 0) {
-      strongCount++;
-      indexedNodes[nodeId] = {
-        node_id: nodeId,
-        classification: "strong",
-        explanation: `Shares thematic keywords: #${sharedKws.slice(0, 2).join(", #")}`
-      };
-      return;
-    }
-
-    // Check Bridge Connection:
-    // conceptually linked through shared death, fearlessness, witness-consciousness, Shakti, body, ego, self/no-self, or comparative themes.
-    const lowerTitle = node.concept_title.toLowerCase();
-    const lowerKws = node.keywords.map(k => k.toLowerCase());
-    const lowerTexts = node.text_fragments.map(f => f.fragment_content.toLowerCase());
-
-    const hasTerm = (term: string) => {
-      return (
-        lowerTitle.includes(term) ||
-        lowerKws.some(k => k.includes(term)) ||
-        lowerTexts.some(t => t.includes(term))
-      );
-    };
-
-    let matchedBridgeTerm = "";
-    if (hasTerm("sakshi") || hasTerm("witness")) {
-      matchedBridgeTerm = "witness-consciousness / Sakshi";
-    } else if (hasTerm("abhaya") || hasTerm("fearless")) {
-      matchedBridgeTerm = "fearlessness / Abhaya";
-    } else if (hasTerm("shakti") || hasTerm("kali") || hasTerm("durga") || hasTerm("goddess") || hasTerm("mother")) {
-      matchedBridgeTerm = "cosmic motherly destruction / Shakti";
-    } else if (hasTerm("deha") || hasTerm("body") || hasTerm("kosha") || hasTerm("skandha") || hasTerm("annamaya")) {
-      matchedBridgeTerm = "body/mind deconstruction";
-    } else if (hasTerm("ego") || hasTerm("self") || hasTerm("atman") || hasTerm("anatta") || hasTerm("neti-neti")) {
-      matchedBridgeTerm = "ego/self transcendence";
-    } else if (hasTerm("death") || hasTerm("mortal") || hasTerm("decay") || hasTerm("cessation") || hasTerm("impermanence") || hasTerm("maraṇānusmṛti") || hasTerm("marana")) {
-      matchedBridgeTerm = "death / impermanence / cessation";
-    } else {
-      // General check against bridge terms
-      const foundVocab = bridgeVocabulary.find(term => hasTerm(term));
-      if (foundVocab) {
-        matchedBridgeTerm = `comparative theme: "${foundVocab}"`;
+      if (hasKali) {
+        score += 15;
+        bridgeExplanation = "Bridge through dynamic Kali/Shakti as the play of form seen by the Witness";
+      } else if (hasAtman) {
+        score += 15;
+        bridgeExplanation = "Lineage bridge connecting Atman with absolute Witness-consciousness";
+      }
+    } else if (focusLower === "maranasati" || focusLower === "marananusmrti" || focusLower === "impermanence") {
+      const hasAtmanOrSakshi = nodeKwsLower.some(k => k === "atman" || k === "sakshi");
+      if (hasAtmanOrSakshi) {
+        score += 15;
+        bridgeExplanation = "Bridge contrasting Buddhist transience with Vedantic deathlessness";
       }
     }
 
-    if (matchedBridgeTerm) {
+    if (bridgeExplanation) {
+      explanations.push(bridgeExplanation);
+    }
+
+    // Threshold classification
+    // Direct matches are already returned early.
+    // Connected (strong) threshold: >= 25
+    // Bridge threshold: >= 12
+    let classification: FocusClassification = "unrelated";
+    let explanation = "Unrelated to current focus lens context";
+
+    if (score >= 25) {
+      classification = "strong";
+      strongCount++;
+      explanation = explanations[0] || "Strongly connected conceptually";
+    } else if (score >= 12) {
+      classification = "bridge";
       bridgeCount++;
-      indexedNodes[nodeId] = {
-        node_id: nodeId,
-        classification: "bridge",
-        explanation: `Connected through ${matchedBridgeTerm}`
-      };
-      return;
+      explanation = explanations.find(e => e.includes("Bridge")) || explanations[0] || "Connected through comparative themes";
+    } else {
+      unrelatedCount++;
     }
 
-    // Unrelated
-    unrelatedCount++;
     indexedNodes[nodeId] = {
       node_id: nodeId,
-      classification: "unrelated",
-      explanation: "Unrelated to current focus lens context"
+      classification,
+      explanation
     };
   });
 
