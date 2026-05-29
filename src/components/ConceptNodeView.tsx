@@ -20,6 +20,7 @@ interface ConceptNodeProps {
   onSelectNode: (nodeId: string) => void;
   onSuggestedClick?: (conceptName: string) => void;
   indexedNodes?: Record<string, any>;
+  showOnlyFocused?: boolean;
 }
 
 export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
@@ -31,6 +32,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
   onSelectNode,
   onSuggestedClick,
   indexedNodes,
+  showOnlyFocused,
 }) => {
   const [expanded, setExpanded] = useState(true); // Default parent nodes to expanded for structural visibility
   const [loading, setLoading] = useState(false);
@@ -75,6 +77,68 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
     e.stopPropagation();
     onSelectNode(node.node_id);
   };
+
+  const analysis = indexedNodes?.[node.node_id];
+  const classification = analysis ? analysis.classification : "none";
+  const explanation = analysis ? analysis.explanation : "";
+  const isSkeleton = showOnlyFocused && activeKeyword && classification === "unrelated";
+
+  if (isSkeleton) {
+    return (
+      <div id={`node-view-${node.node_id}`} className="ml-4 md:ml-8 mb-3 border-l border-slate-900/30 pl-4 md:pl-6 transition-all duration-300 opacity-25 hover:opacity-80">
+        <div 
+          onClick={handleSelect}
+          className="group relative flex items-center justify-between p-3 rounded-lg border border-slate-900 bg-slate-950/10 cursor-pointer transition-all duration-200"
+        >
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+              className="p-1 rounded bg-[#13141a] hover:bg-[#1a1b24] transition-colors text-slate-500 flex items-center justify-center animate-none"
+            >
+              {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            </button>
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-sans font-medium tracking-wide">
+                {node.concept_title} <span className="text-slate-600 text-[10px] font-mono ml-2">(Structural Lineage)</span>
+              </span>
+            </div>
+          </div>
+          
+          <span className="text-[10px] font-sans text-slate-600">Collapsed</span>
+        </div>
+
+        {/* Render children recursively */}
+        <AnimatePresence>
+          {expanded && hasChildren && (
+            <motion.div 
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="mt-2 space-y-2"
+            >
+              {node.children!.map((child) => (
+                <ConceptNodeView
+                  key={child.node_id}
+                  node={child}
+                  activeKeyword={activeKeyword}
+                  onKeywordClick={onKeywordClick}
+                  onUpdateChildren={onUpdateChildren}
+                  selectedNodeId={selectedNodeId}
+                  onSelectNode={onSelectNode}
+                  onSuggestedClick={onSuggestedClick}
+                  indexedNodes={indexedNodes}
+                  showOnlyFocused={showOnlyFocused}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
 
   // Thematic traditional classifications based on grouping or texts
   const getTraditionTheme = (category: string, title: string) => {
@@ -125,10 +189,6 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
 
   const theme = getTraditionTheme(node.grouping_category, node.concept_title);
   const isKeywordHighlighted = activeKeyword && node.keywords.includes(activeKeyword);
-
-  const analysis = indexedNodes?.[node.node_id];
-  const classification = analysis ? analysis.classification : "none";
-  const explanation = analysis ? analysis.explanation : "";
 
   let outerClass = "ml-4 md:ml-8 mb-6 border-l pl-4 md:pl-6 transition-all duration-300 ";
   let cardClass = "group relative flex flex-col p-6 rounded-lg border transition-all duration-200 cursor-pointer ";
@@ -363,6 +423,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
                 onSelectNode={onSelectNode}
                 onSuggestedClick={onSuggestedClick}
                 indexedNodes={indexedNodes}
+                showOnlyFocused={showOnlyFocused}
               />
             ))}
           </motion.div>

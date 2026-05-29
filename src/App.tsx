@@ -1418,6 +1418,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                   selectedNodeId={selectedNodeId}
                   onSelectNode={handleSelectNode}
                   indexedNodes={focusResult.indexedNodes}
+                  showOnlyFocused={showOnlyFocused}
                 />
               ))
             ) : (

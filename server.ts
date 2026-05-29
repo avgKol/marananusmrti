@@ -72,6 +72,14 @@ async function startServer() {
     }
   }
 
+  function parseGeminiJson(rawText: string): any {
+    let cleaned = rawText.trim();
+    if (cleaned.startsWith("```")) {
+      cleaned = cleaned.replace(/^```(?:json)?\n?/i, "").replace(/\n?```$/, "");
+    }
+    return JSON.parse(cleaned.trim());
+  }
+
   // API routes FIRST
   app.post("/api/enrich", async (req, res) => {
     try {
@@ -188,7 +196,7 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
         throw new Error("No response text from Gemini");
       }
       
-      const parsed = JSON.parse(text);
+      const parsed = parseGeminiJson(text);
       res.json(parsed);
     } catch (err: any) {
       console.error("Gemini Error:", err);
@@ -337,7 +345,7 @@ The output must always be a valid JSON matching the schema below.`,
         throw new Error("No response text from Gemini");
       }
 
-      const parsed = JSON.parse(responseText);
+      const parsed = parseGeminiJson(responseText);
       res.json(parsed);
     } catch (err: any) {
       console.error("Chat Error:", err);
@@ -372,7 +380,17 @@ ${JSON.stringify(nodesToTranslate, null, 2)}
           contents: prompt,
           config: {
             systemInstruction: `You must output a JSON array matching the request. For each item in the input, provide an object containing 'id', and optionally 'titleBn' and/or 'quoteBn' matching the requested translations.
-Do not wrap or nest inside other keys, just return the array of translated items.`,
+Do not wrap or nest inside other keys, just return the array of translated items.
+
+CRITICAL TRANSLATION CONSTRAINTS:
+- Use orthodox scholarly terminology.
+- "Witness Consciousness" or "Witness" MUST be translated as "সাক্ষী চৈতন্য" or "সাক্ষী চেতনা" (never as "দৃষ্টিভঙ্গি" or "সাক্ষ্য").
+- "Impermanence" or "Transient" MUST be translated as "অনিত্যতা" or "অনিত্য" (never as "স্থায়ী নয়").
+- "Self" or "Atman" MUST be translated as "আত্মা" or "আত্মন".
+- "No-self" or "Anatta" MUST be translated as "অনত্তা" or "অনাঅত্মা".
+- "Death contemplation" or "mindfulness of death" MUST be translated as "মরণানুস্মৃতি" or "মরণাসতি".
+- "Fearlessness" or "Abhaya" MUST be translated as "অভয়" or "ভয়হীনতা".
+- Keep technical Sanskrit/Pali terms in their standard Bengali transliterated form (e.g., 'নেতি-নেতি', 'পঞ্চকোষ', 'মনোনাশ').`,
             responseMimeType: "application/json",
             responseSchema: {
               type: Type.ARRAY,
@@ -395,7 +413,7 @@ Do not wrap or nest inside other keys, just return the array of translated items
         throw new Error("No response text from Gemini translation.");
       }
 
-      const parsed = JSON.parse(text);
+      const parsed = parseGeminiJson(text);
       res.json({ translations: parsed });
     } catch (err: any) {
       console.error("Translation API Error:", err);

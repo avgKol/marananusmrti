@@ -229,18 +229,12 @@ export function analyzeFocusVector(
       }
     }
 
-    if (isChildOfDirect) {
-      score += 35;
-      explanations.push(`Direct child of #${focusConcept} node ("${relativeDirectTitle}")`);
-    } else if (isParentOfDirect) {
-      score += 35;
-      explanations.push(`Direct parent of #${focusConcept} node ("${relativeDirectTitle}")`);
-    } else if (isDescendantOfDirect) {
-      score += 15;
-      explanations.push(`Descendant of direct-match "${relativeDirectTitle}"`);
-    } else if (isAncestorOfDirect) {
-      score += 15;
-      explanations.push(`Parent ancestor of direct-match "${relativeDirectTitle}"`);
+    if (isChildOfDirect || isParentOfDirect) {
+      score += 15; // Damped from 35. Cannot achieve "Connected" status on structure alone.
+      explanations.push(`Structurally adjacent (parent/child) to "${relativeDirectTitle}"`);
+    } else if (isDescendantOfDirect || isAncestorOfDirect) {
+      score += 5; // Damped from 15. Acts as a minor weight helper.
+      explanations.push(`Structural lineage member of "${relativeDirectTitle}"`);
     }
 
     // B. Keyword Overlap (Suppressed if generic)
@@ -250,24 +244,27 @@ export function analyzeFocusVector(
     const importantShared = sharedKws.filter(kw => !genericTerms.has(kw.toLowerCase()));
     const genericShared = sharedKws.filter(kw => genericTerms.has(kw.toLowerCase()));
 
-    if (importantShared.length >= 2) {
-      score += 30;
-      explanations.push(`Shares key thematic terms: #${importantShared.slice(0, 2).join(", #")}`);
-    } else if (importantShared.length === 1) {
-      score += 15;
-      explanations.push(`Shares thematic keyword match: #${importantShared[0]}`);
-    }
+    // Weight rare keywords strongly, generic keywords lightly
+    let keywordScore = 0;
+    importantShared.forEach(kw => {
+      if (rareTerms.has(kw.toLowerCase())) {
+        keywordScore += 15; // Rare keyword match
+      } else {
+        keywordScore += 8;  // Standard keyword match
+      }
+    });
+    keywordScore += Math.min(6, genericShared.length * 2); // Max +6 for generic terms
 
-    // Suppressed generic overlap
-    if (genericShared.length > 0) {
-      score += Math.min(4, genericShared.length * 2); // maximum +4 weight contribution
+    score += keywordScore;
+    if (importantShared.length > 0) {
+      explanations.push(`Semantic overlap: #${importantShared.slice(0, 3).join(", #")}`);
     }
 
     // C. Rare/High-Value Keyword shared with Direct Nodes
     const hasRareKey = node.keywords.some(kw => rareTerms.has(kw.toLowerCase()) && directKeywords.has(kw.toLowerCase()));
     if (hasRareKey) {
       const rareMatch = node.keywords.find(kw => rareTerms.has(kw.toLowerCase()) && directKeywords.has(kw.toLowerCase()));
-      score += 25;
+      score += 15; // Balanced weight contribution
       explanations.push(`Connected through rare keyword: #${rareMatch}`);
     }
 
@@ -313,19 +310,19 @@ export function analyzeFocusVector(
 
     // Threshold classification
     // Direct matches are already returned early.
-    // Connected (strong) threshold: >= 25
-    // Bridge threshold: >= 12
+    // Connected (strong) threshold: >= 35 (Requires structural proximity + keyword overlap or multiple keyword matches)
+    // Bridge threshold: >= 20
     let classification: FocusClassification = "unrelated";
     let explanation = "Unrelated to current focus lens context";
 
-    if (score >= 25) {
+    if (score >= 35) {
       classification = "strong";
       strongCount++;
-      explanation = explanations[0] || "Strongly connected conceptually";
-    } else if (score >= 12) {
+      explanation = explanations.find(e => e.includes("overlap")) || explanations[0] || "Strongly connected conceptually";
+    } else if (score >= 20) {
       classification = "bridge";
       bridgeCount++;
-      explanation = explanations.find(e => e.includes("Bridge")) || explanations[0] || "Connected through comparative themes";
+      explanation = explanations.find(e => e.includes("Bridge")) || explanations.find(e => e.includes("Adjacent")) || explanations[0] || "Connected through comparative themes";
     } else {
       unrelatedCount++;
     }
@@ -352,7 +349,50 @@ export function analyzeFocusVector(
       return order[a.analysis.classification] - order[b.analysis.classification];
     });
 
-  const studyPath = studyPathCandidateNodes.slice(0, 5).map(item => ({
+  // Build a highly curated pedagogical sequence
+  const directCandidates = studyPathCandidateNodes.filter(x => x.analysis.classification === "direct");
+  const strongCandidates = studyPathCandidateNodes.filter(x => x.analysis.classification === "strong");
+  const bridgeCandidates = studyPathCandidateNodes.filter(x => x.analysis.classification === "bridge");
+
+  const curatedPath: typeof studyPathCandidateNodes = [];
+
+  // 1. Foundational Concept (Direct)
+  if (directCandidates.length > 0) {
+    curatedPath.push(directCandidates[0]);
+  }
+
+  // 2. Lineage Context (Strong)
+  if (strongCandidates.length > 0) {
+    curatedPath.push(strongCandidates[0]);
+  }
+
+  // 3. Dialectical Friction (Bridge)
+  if (bridgeCandidates.length > 0) {
+    curatedPath.push(bridgeCandidates[0]);
+  }
+
+  // 4. Secondary Foundation / Extension (Direct / Strong)
+  if (directCandidates.length > 1) {
+    curatedPath.push(directCandidates[1]);
+  } else if (strongCandidates.length > 1) {
+    curatedPath.push(strongCandidates[1]);
+  }
+
+  // 5. Synthesis Resolution (Remaining Bridge)
+  if (bridgeCandidates.length > 1) {
+    curatedPath.push(bridgeCandidates[1]);
+  } else if (strongCandidates.length > 2) {
+    curatedPath.push(strongCandidates[2]);
+  }
+
+  // Fallback: if curated path is too short, backfill with remaining candidates in priority order
+  studyPathCandidateNodes.forEach(item => {
+    if (curatedPath.length < 5 && !curatedPath.some(x => x.node.node_id === item.node.node_id)) {
+      curatedPath.push(item);
+    }
+  });
+
+  const studyPath = curatedPath.slice(0, 5).map(item => ({
     node_id: item.node.node_id,
     concept_title: item.node.concept_title,
     category: item.node.grouping_category
