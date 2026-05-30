@@ -19,6 +19,13 @@ service cloud.firestore {
       allow delete: if isSignedIn() && existing().userId == request.auth.uid;
     }
 
+    // Public shared corpus for Marananusmrti
+    match /public_nodes/{nodeId} {
+      allow read: if true;
+      allow create: if isValidPublicNode(incoming(), nodeId);
+      allow update, delete: if false;
+    }
+
     // Global helpers
     function isSignedIn() {
       return request.auth != null;
@@ -34,6 +41,74 @@ service cloud.firestore {
 
     function isValidId(id) { 
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
+    function isValidPublicNode(data, nodeId) {
+      return data.keys().hasAll([
+          'node_id',
+          'concept_title',
+          'grouping_category',
+          'keywords',
+          'text_fragments',
+          'suggested_sub_concepts'
+        ]) &&
+        data.keys().hasOnly([
+          'node_id',
+          'concept_title',
+          'titleBn',
+          'grouping_category',
+          'keywords',
+          'text_fragments',
+          'suggested_sub_concepts',
+          'parentId',
+          'origin',
+          'createdAt',
+          'sourceNodeId'
+        ]) &&
+        data.node_id == nodeId &&
+        isValidId(data.node_id) &&
+        data.concept_title is string &&
+        data.concept_title.size() > 0 &&
+        data.concept_title.size() <= 240 &&
+        data.grouping_category is string &&
+        data.grouping_category.size() > 0 &&
+        data.grouping_category.size() <= 160 &&
+        data.keywords is list &&
+        data.keywords.size() <= 24 &&
+        data.text_fragments is list &&
+        data.text_fragments.size() > 0 &&
+        data.text_fragments.size() <= 8 &&
+        data.suggested_sub_concepts is list &&
+        data.suggested_sub_concepts.size() <= 16 &&
+        (!('titleBn' in data) || data.titleBn == null || (data.titleBn is string && data.titleBn.size() <= 1200)) &&
+        (!('parentId' in data) || data.parentId == null || isValidId(data.parentId)) &&
+        (!('origin' in data) || data.origin == 'seed' || data.origin == 'anonymous_ai') &&
+        (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 80)) &&
+        (!('sourceNodeId' in data) || data.sourceNodeId == null || isValidId(data.sourceNodeId)) &&
+        hasValidFirstFragment(data.text_fragments);
+    }
+
+    function hasValidFirstFragment(fragments) {
+      return fragments[0].keys().hasAll([
+          'source_or_author',
+          'fragment_content',
+          'hyperlink_or_citation'
+        ]) &&
+        fragments[0].keys().hasOnly([
+          'source_or_author',
+          'fragment_content',
+          'hyperlink_or_citation',
+          'quoteBn'
+        ]) &&
+        fragments[0].source_or_author is string &&
+        fragments[0].source_or_author.size() > 0 &&
+        fragments[0].source_or_author.size() <= 240 &&
+        fragments[0].fragment_content is string &&
+        fragments[0].fragment_content.size() > 0 &&
+        fragments[0].fragment_content.size() <= 4000 &&
+        fragments[0].hyperlink_or_citation is string &&
+        fragments[0].hyperlink_or_citation.size() <= 240 &&
+        (!('quoteBn' in fragments[0]) || fragments[0].quoteBn == null || (fragments[0].quoteBn is string && fragments[0].quoteBn.size() <= 4000));
     }
   }
 }

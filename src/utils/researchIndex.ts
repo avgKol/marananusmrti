@@ -1,5 +1,5 @@
 import { ConceptNode } from "../types";
-import { sanitizeBengaliText } from "./focusAnalysis";
+import { sanitizeBengaliText, sanitizeBengaliTitle } from "./focusAnalysis";
 
 export interface ResearchKeywordEntry {
   keyword: string;
@@ -65,7 +65,7 @@ export function buildResearchIndex(nodes: ConceptNode[]): ResearchIndex {
   const fragments: ResearchFragmentEntry[] = [];
 
   flatNodes.forEach((node) => {
-    const cleanTitleBn = sanitizeBengaliText(node.titleBn);
+    const cleanTitleBn = sanitizeBengaliTitle(node.titleBn);
     node.keywords.forEach((keyword) => {
       const normalizedKeyword = normalizeText(keyword);
       const existing = keywordMap.get(normalizedKeyword);

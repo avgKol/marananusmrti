@@ -9,7 +9,7 @@ import {
   Compass
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { sanitizeBengaliText } from "../utils/focusAnalysis";
+import { sanitizeBengaliText, sanitizeBengaliTitle } from "../utils/focusAnalysis";
 
 interface ConceptNodeProps {
   node: ConceptNode;
@@ -312,7 +312,7 @@ export const ConceptNodeView: React.FC<ConceptNodeProps> = ({
               </h3>
               {node.titleBn && (
                 <span className="text-slate-400 text-xs md:text-sm font-sans mt-0.5 tracking-normal">
-                  {sanitizeBengaliText(node.titleBn)}
+                  {sanitizeBengaliTitle(node.titleBn)}
                 </span>
               )}
             </div>

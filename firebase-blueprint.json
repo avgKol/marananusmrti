@@ -2,7 +2,7 @@
   "entities": {
     "ConceptNode": {
       "title": "ConceptNode",
-      "description": "A node in the philosophical concept graph.",
+      "description": "A public shared node in the Marananusmrti research corpus.",
       "type": "object",
       "properties": {
         "node_id": {
@@ -26,12 +26,15 @@
         "parentId": {
           "type": "string"
         },
-        "userId": {
+        "origin": {
           "type": "string"
         },
         "createdAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "sourceNodeId": {
+          "type": "string"
         }
       },
       "required": [
@@ -41,15 +44,14 @@
         "keywords",
         "text_fragments",
         "suggested_sub_concepts",
-        "userId",
         "createdAt"
       ]
     }
   },
   "firestore": {
-    "nodes/{nodeId}": {
+    "public_nodes/{nodeId}": {
       "schema": "ConceptNode",
-      "description": "Flat collection of philosophical concept nodes, keyed by node_id."
+      "description": "Flat public collection of philosophical concept nodes, keyed by node_id."
     }
   }
 }

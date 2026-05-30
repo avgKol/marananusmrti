@@ -4,7 +4,7 @@ import { ConceptNode } from "../types";
 import {
   ResearchIndex,
 } from "../utils/researchIndex";
-import { sanitizeBengaliText } from "../utils/focusAnalysis";
+import { sanitizeBengaliText, sanitizeBengaliTitle } from "../utils/focusAnalysis";
 
 export type ExplorerFacet = "keywords" | "quotes" | "sources";
 export type WorkspaceMode = "graph" | "explorer" | "reading";
@@ -225,8 +225,8 @@ export function ResearchExplorerPanel({
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-2">
-                            {sampleNodes.map((title) => (
-                              <span key={title} className="text-[11px] px-2 py-1 rounded-full bg-[#10121a] border border-slate-800 text-slate-300">
+                            {sampleNodes.map((title, index) => (
+                              <span key={`${entry.normalizedKeyword}-${title}-${index}`} className="text-[11px] px-2 py-1 rounded-full bg-[#10121a] border border-slate-800 text-slate-300">
                                 {title}
                               </span>
                             ))}
@@ -332,9 +332,9 @@ export function ResearchExplorerPanel({
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {fragment.keywords.slice(0, 8).map((kw) => (
+                      {fragment.keywords.slice(0, 8).map((kw, index) => (
                         <button
-                          key={kw}
+                          key={`${fragment.id}-${kw}-${index}`}
                           onClick={() => onExplorerKeywordSelect(kw)}
                           className={panelChipClass}
                         >
@@ -366,8 +366,8 @@ export function ResearchExplorerPanel({
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          {source.conceptTitles.slice(0, 4).map((title) => (
-                            <span key={title} className="text-[11px] px-2 py-1 rounded-full bg-[#0d1017] border border-slate-800 text-slate-300">
+                          {source.conceptTitles.slice(0, 4).map((title, index) => (
+                            <span key={`${source.normalizedSource}-${title}-${index}`} className="text-[11px] px-2 py-1 rounded-full bg-[#0d1017] border border-slate-800 text-slate-300">
                               {title}
                             </span>
                           ))}
@@ -457,15 +457,15 @@ export function ReadingDeskPanel({
                   </h2>
                   {selectedNode.titleBn && (
                     <p className="text-slate-400 text-sm font-sans leading-relaxed">
-                      {sanitizeBengaliText(selectedNode.titleBn)}
+                      {sanitizeBengaliTitle(selectedNode.titleBn)}
                     </p>
                   )}
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {selectedNode.keywords.map((kw) => (
+                  {selectedNode.keywords.map((kw, index) => (
                     <button
-                      key={kw}
+                      key={`${selectedNode.node_id}-${kw}-${index}`}
                       onClick={() => onFocusKeywordInGraph(kw)}
                       className="text-xs font-sans px-2.5 py-1 rounded-full border bg-[#11131a] border-slate-800 text-slate-300 hover:text-amber-300 hover:border-amber-900/45 transition-colors"
                     >
@@ -502,8 +502,8 @@ export function ReadingDeskPanel({
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-1.5">
-                          {item.sharedKeywords.slice(0, 3).map((kw) => (
-                            <span key={kw} className="text-[10px] px-2 py-0.5 rounded-full bg-[#0d1017] border border-slate-800 text-slate-400">
+                          {item.sharedKeywords.slice(0, 3).map((kw, index) => (
+                            <span key={`${item.node.node_id}-${kw}-${index}`} className="text-[10px] px-2 py-0.5 rounded-full bg-[#0d1017] border border-slate-800 text-slate-400">
                               #{kw}
                             </span>
                           ))}
@@ -522,8 +522,8 @@ export function ReadingDeskPanel({
                 <div className="p-5 bg-[#13151f] border border-slate-800 rounded-lg space-y-3">
                   <h4 className="text-xs font-mono uppercase tracking-widest text-slate-400">Suggested follow-ups</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedNode.suggested_sub_concepts.map((sub) => (
-                      <span key={sub} className="text-xs font-sans px-2.5 py-1 rounded-full bg-[#10121a] border border-slate-800 text-slate-300">
+                    {selectedNode.suggested_sub_concepts.map((sub, index) => (
+                      <span key={`${selectedNode.node_id}-sub-${index}-${sub}`} className="text-xs font-sans px-2.5 py-1 rounded-full bg-[#10121a] border border-slate-800 text-slate-300">
                         {sub}
                       </span>
                     ))}

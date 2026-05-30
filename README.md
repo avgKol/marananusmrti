@@ -1,20 +1,38 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Marananusmrti
 
-# Run and deploy your AI Studio app
+Marananusmrti is a public, unauthenticated research fork of Marana-Lab.
 
-This contains everything you need to run your app locally.
+It keeps the philosophical corpus and Gemini-powered comparative assistance, but removes Google sign-in, removes Drive dependency, and treats the app as a shared public workspace instead of a private personal notebook.
 
-View your app in AI Studio: https://ai.studio/apps/f095d8aa-6c1b-4e17-9435-90603aed9b1c
+## Core model
 
-## Run Locally
+- `Explorer` for keyword, quote, and source retrieval
+- `Graph` for conceptual constellation reading
+- `Reading Desk` for deep study of one concept at a time
 
-**Prerequisites:**  Node.js
+## Public corpus
 
+- Canonical seed corpus is checked in at `src/content/corpus.seed.json`
+- Live shared data is stored in Firestore collection `public_nodes`
+- The app reads publicly and creates publicly
+- The app does not require Google login anywhere
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Local development
+
+1. Install dependencies with `npm install`
+2. Set `GEMINI_API_KEY` in `.env.local`
+3. Run `npm run dev`
+4. Open `http://localhost:3000`
+
+## Validation
+
+- `npm run lint`
+- `npm run build`
+
+## Deployment target
+
+- GCP project: `gen-lang-client-0390414473`
+- Region: `us-west1`
+- Cloud Run service: `marananusmrti`
+
+The intended GitOps flow is push to `main`, let Cloud Build deploy, then verify the live public page and public corpus behavior.

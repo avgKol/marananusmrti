@@ -6,11 +6,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const JSON_LIMIT = "128kb";
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000;
+const RATE_LIMIT_MAX = 18;
+
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT || 3000);
 
-  app.use(express.json());
+  app.set("trust proxy", true);
+  app.use(express.json({ limit: JSON_LIMIT }));
 
   const createGeminiClient = (apiKey: string) => {
     return new GoogleGenAI({
@@ -80,13 +85,92 @@ async function startServer() {
     return JSON.parse(cleaned.trim());
   }
 
+  const rateBuckets = new Map<string, { count: number; resetAt: number }>();
+
+  const getClientKey = (req: express.Request) => {
+    const forwarded = req.headers["x-forwarded-for"];
+    if (typeof forwarded === "string" && forwarded.trim()) {
+      return forwarded.split(",")[0].trim();
+    }
+    return req.ip || "unknown";
+  };
+
+  const aiRateLimit: express.RequestHandler = (req, res, next) => {
+    const clientKey = getClientKey(req);
+    const currentTime = Date.now();
+    const currentBucket = rateBuckets.get(clientKey);
+
+    if (!currentBucket || currentBucket.resetAt <= currentTime) {
+      rateBuckets.set(clientKey, {
+        count: 1,
+        resetAt: currentTime + RATE_LIMIT_WINDOW_MS,
+      });
+      next();
+      return;
+    }
+
+    if (currentBucket.count >= RATE_LIMIT_MAX) {
+      res.status(429).json({
+        error: "Too many AI requests from this client. Please wait a few minutes and try again.",
+      });
+      return;
+    }
+
+    currentBucket.count += 1;
+    rateBuckets.set(clientKey, currentBucket);
+    next();
+  };
+
+  const isNonEmptyString = (value: unknown, maxLength = 4000): value is string =>
+    typeof value === "string" && value.trim().length > 0 && value.trim().length <= maxLength;
+
+  const isStringArray = (value: unknown, maxItems = 16, itemMaxLength = 120): value is string[] =>
+    Array.isArray(value) &&
+    value.length <= maxItems &&
+    value.every((item) => typeof item === "string" && item.trim().length > 0 && item.trim().length <= itemMaxLength);
+
+  const isFragmentArray = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length <= 8 &&
+    value.every(
+      (fragment) =>
+        fragment &&
+        typeof fragment === "object" &&
+        isNonEmptyString((fragment as any).fragment_content, 2400) &&
+        isNonEmptyString((fragment as any).source_or_author, 240)
+    );
+
+  const isChatMessageArray = (value: unknown) =>
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.length <= 20 &&
+    value.every(
+      (message) =>
+        message &&
+        typeof message === "object" &&
+        (((message as any).role === "user") || (message as any).role === "assistant") &&
+        isNonEmptyString((message as any).content, 6000)
+    );
+
   // API routes FIRST
-  app.post("/api/enrich", async (req, res) => {
+  app.post("/api/enrich", aiRateLimit, async (req, res) => {
     try {
       const { nodeTitle, nodeKeywords, fragments } = req.body;
 
       if (!process.env.GEMINI_API_KEY) {
         return res.status(400).json({ error: "Missing Gemini API Key." });
+      }
+
+      if (!isNonEmptyString(nodeTitle, 240)) {
+        return res.status(400).json({ error: "A valid nodeTitle string is required." });
+      }
+
+      if (nodeKeywords !== undefined && !isStringArray(nodeKeywords, 24, 80)) {
+        return res.status(400).json({ error: "nodeKeywords must be an array of short strings." });
+      }
+
+      if (fragments !== undefined && !isFragmentArray(fragments)) {
+        return res.status(400).json({ error: "fragments must be an array of valid text fragments." });
       }
 
       const prompt = `Analyze this philosophical concept node and expand on it.
@@ -103,7 +187,7 @@ ${fragments?.map((f: any) => `- ${f.fragment_content} (Source: ${f.source_or_aut
           model: "gemini-3.5-flash",
           contents: prompt,
           config: {
-            systemInstruction: `You are an uncompromising Advaitic Philosophical Engine. You dissect inputs concerning death, mortality, and existentialism. You must distinguish between the two primary traditions of the Marana-Lab:
+            systemInstruction: `You are an uncompromising Advaitic Philosophical Engine. You dissect inputs concerning death, mortality, and existentialism. You must distinguish between the two primary traditions of the Marananusmrti corpus:
 
 1. BUDDHIST TRADITION (Buddhism, impermanence, decay, etc.):
    For Buddhism-related nodes, do NOT alter the existing Buddhist concept-generation behavior, Buddhist sources (such as Atisha, Buddhaghosa, Pali Canon), Buddhist prompts, or Buddhist generation style. Continue to use authoritative Buddhist terms (Anicca, Anatta, Skandhas, Marananasati) and verified canonical references.
@@ -204,7 +288,7 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
     }
   });
 
-  app.post("/api/chat", async (req, res) => {
+  app.post("/api/chat", aiRateLimit, async (req, res) => {
     try {
       const { messages, activeNodeTitle } = req.body;
 
@@ -212,8 +296,12 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
         return res.status(400).json({ error: "Missing Gemini API Key." });
       }
 
-      if (!messages || !Array.isArray(messages)) {
-        return res.status(400).json({ error: "Messages array is required." });
+      if (!isChatMessageArray(messages)) {
+        return res.status(400).json({ error: "Messages must be a non-empty array of chat turns." });
+      }
+
+      if (activeNodeTitle !== null && activeNodeTitle !== undefined && !isNonEmptyString(activeNodeTitle, 240)) {
+        return res.status(400).json({ error: "activeNodeTitle must be a short string when provided." });
       }
 
       const promptContext = messages.map((m: any) => `${m.role === "user" ? "User" : "Scholar Assistant"}: ${m.content}`).join("\n");
@@ -228,7 +316,7 @@ When expanding a node, provide ruthless philosophical clarity. Do not synthesize
         config: {
           systemInstruction: `You are an eminent comparative philosopher, Indologist, and metadata scholar specializing in the philosophies of death, impermanence, and liberation across Buddhist (Theravada, Madhyamaka, Zen) and Hindu (Advaita Vedanta, Upanishads) systems.
 
-Provide deep, rigorous academics, and absolute metaphysical depth. Help the user map, comprehend, and connect the dots in the Marana-Lab. Use high-contrast, beautiful markdown formatting in your response (using headers, lists, and blockquotes where appropriate). Keep responses intellectually demanding yet accessible.
+Provide deep, rigorous academics, and absolute metaphysical depth. Help the user map, comprehend, and connect the dots in the Marananusmrti research workspace. Use high-contrast, beautiful markdown formatting in your response (using headers, lists, and blockquotes where appropriate). Keep responses intellectually demanding yet accessible.
 
 When providing explanations, comparing paths, or answering queries, adhere strictly to the following parameters:
 
@@ -354,11 +442,27 @@ The output must always be a valid JSON matching the schema below.`,
   });
 
   // Dynamic Bengali Translation Backfiller Endpoint
-  app.post("/api/translate-nodes", async (req, res) => {
+  app.post("/api/translate-nodes", aiRateLimit, async (req, res) => {
     try {
       const { nodesToTranslate } = req.body;
       if (!nodesToTranslate || !Array.isArray(nodesToTranslate) || nodesToTranslate.length === 0) {
         return res.json({ translations: [] });
+      }
+
+      if (
+        nodesToTranslate.length > 40 ||
+        !nodesToTranslate.every(
+          (item: any) =>
+            item &&
+            typeof item === "object" &&
+            isNonEmptyString(item.id, 160) &&
+            (item.title === undefined || isNonEmptyString(item.title, 240)) &&
+            (item.quote === undefined || isNonEmptyString(item.quote, 2400))
+        )
+      ) {
+        return res.status(400).json({
+          error: "nodesToTranslate must contain valid id/title/quote translation payloads.",
+        });
       }
 
       if (!process.env.GEMINI_API_KEY) {

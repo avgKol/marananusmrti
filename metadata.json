@@ -1,6 +1,6 @@
 {
-  "name": "Take2: Philosophical Concept Graph",
-  "description": "A recursive Concept Graph visualizer demonstrating AI-driven node enrichment for exploring philosophical ideas.",
+  "name": "Marananusmrti",
+  "description": "A public comparative research workspace for exploring death, impermanence, witness-consciousness, and related contemplative traditions.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

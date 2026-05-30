@@ -458,20 +458,77 @@ export function filterFocusedTree(nodes: ConceptNode[], indexedNodes: Record<str
     .filter((n): n is ConceptNode => n !== null);
 }
 
-/**
- * Defensively sanitizes Bengali translations (titleBn, quoteBn) to strip out LLM prompt leakage,
- * bracketed English translations, and meta-instructions before rendering or saving.
- */
-export function sanitizeBengaliText(text: string | undefined | null): string {
-  if (!text) return "";
-  
-  let cleaned = text.trim();
-  
-  // 1. Remove bracketed or parenthesized English translations or explanations, e.g. [English translation]
-  cleaned = cleaned.replace(/\[[^\]]*[a-zA-Z]{2,}[^\]]*\]/g, "");
-  cleaned = cleaned.replace(/\([^)]*[a-zA-Z]{2,}[^)]*\)/g, "");
+const BENGALI_CHAR_PATTERN = /[\u0980-\u09FF]/;
+const LATIN_CHAR_PATTERN = /[a-zA-Z]/;
+const PROMPT_LEAKAGE_PATTERN =
+  /(this should|let'?s|translation directly|pure valid json|control token|re-evaluation|metadata inside strings|quote:|here is the translation|direct translation|translated as|philosophical concept)/i;
 
-  // 2. Remove standard LLM prompt leakage phrases (case-insensitive)
+function normalizeBengaliCandidate(value: string): string {
+  return value
+    .replace(/\\[ntr]/g, " ")
+    .replace(/[�]+/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/^[\s"'`~:;,\-–—>[\](){}\\/]+/, "")
+    .replace(/[\s"'`~:;,\-–—<[\](){}\\/]+$/, "")
+    .trim();
+}
+
+function collectBengaliCandidates(value: string): string[] {
+  const candidates = new Set<string>();
+  const addCandidate = (candidate: string) => {
+    const normalized = normalizeBengaliCandidate(candidate);
+    if (!normalized) return;
+    if (!BENGALI_CHAR_PATTERN.test(normalized)) return;
+    candidates.add(normalized);
+  };
+
+  addCandidate(value);
+
+  value.split(/\n+/).forEach(addCandidate);
+  value.split(/\s*(?:->|=>|\|)\s*/).forEach(addCandidate);
+
+  for (const match of value.matchAll(/["“]([^"”]*[\u0980-\u09FF][^"”]*)["”]/g)) {
+    addCandidate(match[1]);
+  }
+
+  for (const match of value.matchAll(/([^\n]*[\u0980-\u09FF][^\n]*)/g)) {
+    addCandidate(match[1]);
+  }
+
+  return [...candidates];
+}
+
+function scoreBengaliCandidate(candidate: string, mode: "title" | "text"): number {
+  const bengaliCount = (candidate.match(/[\u0980-\u09FF]/g) || []).length;
+  const latinCount = (candidate.match(/[a-zA-Z]/g) || []).length;
+  const length = candidate.length;
+
+  if (bengaliCount === 0) return Number.NEGATIVE_INFINITY;
+  if (PROMPT_LEAKAGE_PATTERN.test(candidate)) return Number.NEGATIVE_INFINITY;
+
+  if (mode === "title") {
+    return bengaliCount * 7 - latinCount * 6 - Math.max(0, length - 96);
+  }
+
+  return bengaliCount * 5 - latinCount * 5 - (length < 18 ? 24 : 0);
+}
+
+function sanitizeBengali(value: string | undefined | null, mode: "title" | "text"): string {
+  if (!value) return "";
+
+  let cleaned = value
+    .replace(/\\[ntr]/g, " ")
+    .replace(/[�]+/g, "")
+    .trim();
+
+  const explicitArrowMatch = cleaned.match(/->\s*["“]([^"”]*[\u0980-\u09FF][^"”]*)["”]/);
+  if (explicitArrowMatch) {
+    return normalizeBengaliCandidate(explicitArrowMatch[1]);
+  }
+
+  cleaned = cleaned.replace(/\[[^\]]*[a-zA-Z]{2,}[^\]]*\]/g, " ");
+  cleaned = cleaned.replace(/\([^)]*[a-zA-Z]{2,}[^)]*\)/g, " ");
+
   const leakagePatterns = [
     /here is the translation:?/gi,
     /direct translation:?/gi,
@@ -480,33 +537,60 @@ export function sanitizeBengaliText(text: string | undefined | null): string {
     /let's provide translation directly:?/gi,
     /let's provide translation:?/gi,
     /translation:?/gi,
-    /philosophical concept:?/gi
+    /philosophical concept:?/gi,
+    /this should be translated carefully[^.]*\.?/gi,
+    /re-evaluation of instructions[^.]*\.?/gi,
+    /no extra text at all\.?/gi,
+    /only pure valid json\.?/gi,
   ];
-  
-  leakagePatterns.forEach(pattern => {
-    cleaned = cleaned.replace(pattern, "");
+
+  leakagePatterns.forEach((pattern) => {
+    cleaned = cleaned.replace(pattern, " ");
   });
 
-  // 3. Remove trailing/leading arrow tags or meta-instructions
-  cleaned = cleaned.replace(/->\s*[a-zA-Z\s,.:\-!?()]+/g, "");
-  cleaned = cleaned.replace(/[a-zA-Z\s,.:\-!?()'"◇◈⌁\/\\]+->/g, "");
+  cleaned = cleaned
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return false;
+      const latinCount = (line.match(/[a-zA-Z]/g) || []).length;
+      const totalCharCount = line.length || 1;
+      const hasBengali = BENGALI_CHAR_PATTERN.test(line);
+      if (PROMPT_LEAKAGE_PATTERN.test(line)) return false;
+      if (!hasBengali && latinCount > 0) return false;
+      if (latinCount / totalCharCount > 0.35) return false;
+      return true;
+    })
+    .join("\n");
 
-  // 4. Split and filter out lines that are purely English (prompt leftovers)
-  cleaned = cleaned.split("\n").map(line => {
-    const trimmed = line.trim();
-    if (!trimmed) return "";
-    const englishCharCount = (trimmed.match(/[a-zA-Z]/g) || []).length;
-    const totalCharCount = trimmed.length;
-    const hasBengali = /[\u0980-\u09FF]/.test(trimmed);
-    // If a line is mostly English and has no Bengali characters, strip it
-    if (totalCharCount > 3 && (englishCharCount / totalCharCount > 0.5) && !hasBengali) {
-      return "";
-    }
-    return trimmed;
-  }).filter(line => line.length > 0).join("\n");
+  const candidates = collectBengaliCandidates(cleaned)
+    .map((candidate) => normalizeBengaliCandidate(candidate))
+    .filter(Boolean);
 
-  // 5. Clean up leading/trailing colons, dashes, slashes, brackets, and extra whitespace
-  cleaned = cleaned.replace(/^[:\-\s\/\\]+/, "").replace(/[:\-\s\/\\]+$/, "");
+  const bestCandidate = candidates
+    .map((candidate) => ({
+      candidate,
+      score: scoreBengaliCandidate(candidate, mode),
+    }))
+    .filter((entry) => Number.isFinite(entry.score))
+    .sort((left, right) => right.score - left.score)[0]?.candidate;
 
-  return cleaned.trim();
+  const result = bestCandidate || normalizeBengaliCandidate(cleaned);
+  if (!BENGALI_CHAR_PATTERN.test(result) || PROMPT_LEAKAGE_PATTERN.test(result)) {
+    return "";
+  }
+
+  return result;
+}
+
+export function sanitizeBengaliTitle(text: string | undefined | null): string {
+  return sanitizeBengali(text, "title");
+}
+
+/**
+ * Defensively sanitizes Bengali quote text to strip out LLM prompt leakage,
+ * bracketed English translations, and meta-instructions before rendering or saving.
+ */
+export function sanitizeBengaliText(text: string | undefined | null): string {
+  return sanitizeBengali(text, "text");
 }

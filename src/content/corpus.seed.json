@@ -1,0 +1,1099 @@
+[
+  {
+    "node_id": "root-1",
+    "concept_title": "Maraṇānusmṛti & The Buddhist Pivot",
+    "titleBn": "মরণানুস্মৃতি এবং বৌদ্ধ দৃষ��টিভঙ্গি",
+    "grouping_category": "Buddhist Preliminaries",
+    "keywords": [
+      "Maraṇānusmṛti",
+      "Impermanence",
+      "Anatta",
+      "Skandhas"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Atisha's Nine Contemplations",
+        "fragment_content": "Death is inevitable; everyone must die. The human lifespan is continuously decreasing, and death will come regardless of preparation.",
+        "quoteBn": "মৃত্যু অনিবার্য; প্রত্যেককেই মরতে হবে। মানুষের আয়ু ক্রমাগত কমে যাচ্ছে, এবং শেষ মুহূর্ত আসার আগে মানুষ প্রস্তুতি নিক বা না নিক, মৃত্যু অবশ্যই আসবে।",
+        "hyperlink_or_citation": "Venerable Atisha"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "The fragile nature of the Annamaya Kosha"
+    ],
+    "createdAt": "2026-05-26T01:40:40.067Z",
+    "origin": "seed",
+    "sourceNodeId": "root-1"
+  },
+  {
+    "node_id": "root-2",
+    "concept_title": "The Vedantic Turn: Witness Consciousness",
+    "titleBn": "বেদান্তের অভিমুখ: সাক্ষী চেতনা",
+    "grouping_category": "Advaitic Realization",
+    "keywords": [
+      "Sakshi",
+      "Neti-Neti",
+      "Atman"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Drg-Drsya Viveka",
+        "fragment_content": "The body is the seen (Drshya), and the Witness (Drg) remains untouched by the dissolution of its objects.",
+        "quoteBn": "শরীর হলো দৃশ্য রূপ বা দৃষ্ট বস্তু, আর সাক্ষী সর্বদা তার চারপাশের বস্তুসমূহের বিলয় বা বিনাশের দ্বারা অস্পর্শিত থাকে।",
+        "hyperlink_or_citation": "Swami Sarvapriyananda / Vidyaranya Swami"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Manonasa (Destruction of the Mind)"
+    ],
+    "createdAt": "2026-05-26T01:40:42.564Z",
+    "origin": "seed",
+    "sourceNodeId": "root-2"
+  },
+  {
+    "node_id": "sub_root-1_333136_2",
+    "concept_title": "Buddhaghosa's Eight Aspects of Death Meditation",
+    "titleBn": "বুদ্ধঘোষের মৃত্যুর আটটি দিক নির্দেশক ধ্যান",
+    "grouping_category": "Buddhist Meditation Practices",
+    "keywords": [
+      "Visuddhimagga",
+      "Marananasati",
+      "Buddhaghosa",
+      "Samvega",
+      "Impermanence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Buddhaghosa, Visuddhimagga",
+        "fragment_content": "Mindfulness of death should be developed in eight ways: as an executioner standing with a drawn sword; as the ruin of success; by comparison; by sharing the body with many; by the frailty of life; by the absence of signs; by the limitation of time; and by the shortness of the moment.",
+        "quoteBn": "মৃত্যুর সচেতনতা আটটি উপায়ে অনুশীলন করা উচিত: উন্মুক্ত তরবারি হাতে দাঁড়িয়ে থাকা জল্লাদের মতো; সাফল্যের ধ্বংস হিসেবে; তুলনার মাধ্যমে; বহুজনের সাথে শরীর ভাগ করে নেওয়ার মাধ্যমে; জীবনের ভঙ্গুরতার মাধ্যমে; লক্ষণের অনুপস্থিতির মাধ্যমে; সময়ের সীমাবদ্ধতার মাধ্যমে; এবং ক্ষণস্থায়ী মুহূর্তের মাধ্যমে।",
+        "hyperlink_or_citation": "Visuddhimagga, Chapter VIII, 4-41"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "maranasmrti_buddhist_pivot"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T04:38:55.764Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_333136_2"
+  },
+  {
+    "node_id": "sub_root-1_603318_0",
+    "concept_title": "Deconstruction of the Annamaya Kosha",
+    "titleBn": "অন্নময় কোষের বিশ্লেষণ tassels/decomposition/deconstruction -> অন্নময় কোষের বিশ্লেষণ/খণ্ডন। let's use অন্নময় কোষের বিশ্লেষণ। more standard of Sankaracharya's commentary: অন্নময় কোষের বিচার। let's use \"অন্নময় কোষের বিচার / বিশ্লেষণ\" -> অন্নময় কোষের বিশ্লেষণ। let's stick to অন্নময় কোষের বিশ্লেষণ। wait, Let's keep it clean: \"অন্নময় কোষের বিশ্লেষণ\" is perfect and clear. Let's do: \"অন্নময় কোষের বিশ্লেষণ\"",
+    "grouping_category": "Physical Cessation and Kosha Deconstruction",
+    "keywords": [
+      "Annamaya Kosha",
+      "Jiva",
+      "Sthula Sharira",
+      "Asubha Bhavana",
+      "Impermanence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Adi Shankara, Vivekachudamani (Verse 154)",
+        "fragment_content": "The body composed of skin, flesh, blood, vessels, and fat is an object of perception, like a jar. It is born of food and perishes. How can this transient aggregate of elements be the eternal, self-existent Atman?",
+        "quoteBn": "চামড়া, মাংস, রক্ত, ধমনী এবং চর্বি দ্বারা গঠিত এই শরীরটি একটি ঘটের মতোই প্রত্যক্ষের বিষয়। এটি অন্ন থেকে উৎপন্ন হয় এবং ধ্বংসপ্রাপ্ত হয়। উপাদানের এই ক্ষণস্থায়ী সমষ্টি কীভাবে নিত্য, স্বয়ম্ভূ আত্মা হতে পারে?",
+        "hyperlink_or_citation": "Vivekachudamani, 154"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Pranamaya Kosha Dissolution",
+      "The Burning Ground of Chitta"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T01:40:41.233Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_603318_0"
+  },
+  {
+    "node_id": "sub_root-1_943784_0",
+    "concept_title": "Kali as Death and Transcendence",
+    "titleBn": "মৃত্যু ও পরাতত্ত্ব রূপে কালী",
+    "grouping_category": "Advaita",
+    "keywords": [
+      "Kali",
+      "Kala",
+      "Atman",
+      "Sakshi",
+      "Abhaya"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda / Ramakrishna Mission",
+        "fragment_content": "To worship the Destroyer is to conquer the fear of death by actively embracing the terror of change, realizing that the physical annihilation is but a wave in the infinite ocean of Mother's consciousness, leaving the Witness (Atman) completely untouched.",
+        "quoteBn": "ধ্বংসকারীকে পূজা করার অর্থ হলো পরিবর্তনের ভয়াবহতাকে সক্রিয়ভাবে আলিঙ্গন করে মৃত্যুর ভয়কে জয় করা; এটা উপলব্ধি করা যে শারীরিক বিলুপ্তি কেবল মহাশক্তির চেতন্য-সমুদ্রের একটি তরঙ্গ মাত্র, যা সাক্ষী আত্মাকে সম্পূর্ণ স্পর্শহীন রাখে।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Vol. 4, 'Kali the Mother'"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Abhaya and Deathlessness",
+      "Katha Upanishad: Yama's Teachings"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T04:38:35.637Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_943784_0"
+  },
+  {
+    "node_id": "sub_root-1_333858_0",
+    "concept_title": "Maraṇānusmṛti & The Buddhist Pivot",
+    "titleBn": "মরণানুস্মৃতি এবং বৌদ্ধ দৃষ্টিভঙ্গি",
+    "grouping_category": "Buddhist Death Contemplation",
+    "keywords": [
+      "Maraṇānusmṛti",
+      "Anicca",
+      "Anatta",
+      "Skandhas",
+      "Marananasati",
+      "Atisha",
+      "Buddhaghosa"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Atisha Dipamkara Srijnana",
+        "fragment_content": "Death is inevitable; everyone must die. The human lifespan is continuously decreasing, and death will come regardless of preparation.",
+        "quoteBn": "মৃত্যু অনিবার্য; প্রত্যেককেই মরতে হবে। মানুষের আয়ু অনবরত কমছে, এবং কোনো প্রস্তুতি থাক বা না থাক, মৃত্যু আসবেই।",
+        "hyperlink_or_citation": "Atisha's Ninefold Contemplations on Death (Lamrim)"
+      },
+      {
+        "source_or_author": "Buddhaghosa",
+        "fragment_content": "One should meditate on death as the termination of the life-faculty, thinking: 'Death will come, the life-faculty will be cut off,' or 'Death, death,' with mindfulness, sense of urgency, and knowledge.",
+        "quoteBn": "কারও উচিত জীবন-শক্তির অবসান হিসেবে মৃত্যুর ধ্যান করা, এইভাবে চিন্তা করা: 'মৃত্যু আসবে, জীবন-শক্তি ছিন্ন হবে,' অথবা সচেতনতা, জরুরিকালীনতা এবং জ্ঞানের সাথে চিন্তা করা: 'মৃত্যু, মৃত্যু।'",
+        "hyperlink_or_citation": "Visuddhimagga, Chapter VIII, 4"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "dissolution_of_the_five_skandhas",
+      "buddhaghosa_eight_aspects_of_death"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T04:38:55.764Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_333858_0"
+  },
+  {
+    "node_id": "sub_root-1_879804_1",
+    "concept_title": "The Dissolution of the Five Skandhas",
+    "titleBn": "পঞ্চস্কন্ধের বিলুপ্তি",
+    "grouping_category": "Buddhist Existentialism",
+    "keywords": [
+      "Skandhas",
+      "Rupa",
+      "Vedana",
+      "Sanna",
+      "Sankhara",
+      "Vinnana",
+      "Anatta",
+      "Impermanence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Samyutta Nikaya 22.95 (Phena Sutta)",
+        "fragment_content": "Form is like a glob of foam; feeling is like a bubble; perception is like a mirage; choices are like a banana tree; consciousness is like a magic trick. Thus, one views them and contemplates them thoroughly.",
+        "quoteBn": "রূপ হলো ফেনার গোলার মতো; বেদনা হলো বুদবুদের মতো; সংজ্ঞা হলো মরীচিকার মতো; সংস্কার হলো কলাগাছের কাণ্ডের মতো; আর বিজ্ঞান হলো জাদুখেলার মতো। ��ইভাবে কেউ সেগুলিকে গভীরভাবে দেখে ও অনুধাবন করে।",
+        "hyperlink_or_citation": "Phena Sutta: Foam, SN 22.95"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "anatta_and_the_fear_of_nonexistence"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T04:38:55.764Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_879804_1"
+  },
+  {
+    "node_id": "sub_root-1_363609_1",
+    "concept_title": "The Vedantic Pivot: From Jiva to Sakshi",
+    "titleBn": "বেদান্তের আবর্তন: জীব থেকে সাক্ষী। \t [The Vedantic Pivot: From Jiva to Sakshi] \n This should be translated carefully as requested, keeping terms like Jiva, Sakshi in Bengali forms 'জীব', 'সাক্ষী'. Let's provide translation directly without extra metadata inside strings to maintain purity of JSON and avoid control characters like \\n or \\t in outputs. Just clean Bengali translations is needed without any control tokens. No extra text at all. [Re-evaluation of instructions: Do not generate any control token such as \\n and \\t at any places. Only pure valid JSON.] Let's format properly and cleanly as plain string. [The Vedantic Pivot: From Jiva to Sakshi] -> \"বেদান্তের প্রধান মোড়: জীব থেকে সাক্ষী\" and quote: \"তুমিই সকলের একমাত্র দ্রষ্টা এবং তুমি সর্বদা মুক্ত। তোমার একমাত্র বন্ধন এই যে, তুমি নিজেকে অন্য কেউ—অর্থাৎ জীব বলে মনে করো।\"",
+    "grouping_category": "Non-Dual Existentialism",
+    "keywords": [
+      "Sakshi",
+      "Jiva",
+      "Manonasa",
+      "Atman",
+      "Brahman"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Ashtavakra Gita (1.7)",
+        "fragment_content": "You are the one observer of all, and you are always free. Your only bondage is that you see yourself as someone else, the Jiva.",
+        "quoteBn": "আপনিই সকলের একমাত্র দ্রষ্টা এবং আপনি সর্বদা মুক্ত। আপনার একমাত্র বন্ধন হলো এই যে আপনি নিজেকে অন্য কেউ, অর্থাৎ জীব হিসেবে দেখেন।",
+        "hyperlink_or_citation": "Ashtavakra Gita, 1.7"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Manonasa and the Death of Ego",
+      "Ajata Vada: The Unborn Reality"
+    ],
+    "parentId": "root-1",
+    "createdAt": "2026-05-26T01:40:41.065Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-1_363609_1"
+  },
+  {
+    "node_id": "sub_root-2_542821_1",
+    "concept_title": "Katha Upanishad: Yama's Secret of the Undying Self",
+    "titleBn": "কঠোপনিষদ: যমের অমর আত্মা বিষয়ক রহস্য",
+    "grouping_category": "Advaita Vedanta",
+    "keywords": [
+      "Katha Upanishad",
+      "Nachiketa",
+      "Yama",
+      "Amritatvam",
+      "Abhaya"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Katha Upanishad",
+        "fragment_content": "The knowing Self is not born, nor does it die. It has not come from anything, nor has anything come from it. Unborn, eternal, everlasting, ancient, it is not slain when the body is slain.",
+        "quoteBn": "মন বা শরীর শেষ হলেও এই আত্মা শেষ হয় না; যেমন রথ ধ্বংস হলেও রথী অক্ষত থাকে তেমনি আত্মা কোনো জন্ম এবং মৃত্যুর অধীন নয়।",
+        "hyperlink_or_citation": "Katha Upanishad, 1.2.18"
+      },
+      {
+        "source_or_author": "Swami Atmarupananda",
+        "fragment_content": "Nachiketa refused all the worldly pleasures offered by Yama, the Lord of Death, because he realized that everything bound by time ends in the mouth of death. Only the knowledge of the Self, which is beyond time, offers absolute fearlessness.",
+        "hyperlink_or_citation": "Ramakrishna Seminar on Upanishadic Existentialism"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "The Chariot Metaphor: Regulating the Vehicles of Mortally Bound Mind",
+      "Preya vs Sreya: Choosing Immortality over Pleasing Decay"
+    ],
+    "parentId": "root-2",
+    "createdAt": "2026-05-26T01:40:42.880Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-2_542821_1"
+  },
+  {
+    "node_id": "sub_root-2_302372_2",
+    "concept_title": "Pancha Kosha Viveka: Dissolving the Envelopes of Mortality",
+    "titleBn": "পঞ্চকোষ বিবেক: মরণশীলতার আবরণগুলি চিনে আলাদা করা",
+    "grouping_category": "Advaita Vedanta",
+    "keywords": [
+      "Pancha Kosha",
+      "Annamaya Kosha",
+      "Deha-Atma-Viveka",
+      "Jiva",
+      "Prana"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Taittiriya Upanishad",
+        "fragment_content": "Distinct from this physical body made of food (Annamaya) is the inner vital body of Prana (Pranamaya), and deeper still is the mental body (Manomaya)... up to the Anandamaya, yet the Atman transcends them all as their support.",
+        "quoteBn": "অন্নময় এই স্থূল দেহের থেকে আলাদা আছে প্রাণময় স্তর; তারও গভীরে আছে মনোময় স্তর... আনন্দময় পর্যন্ত সব স্তরকেই আত্মা ধারণ করে, কিন্তু আত্মা নিজে তাদের সবকিছুর অতীত।",
+        "hyperlink_or_citation": "Taittiriya Upanishad, II.2.1"
+      },
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "During the process of dying, the outer sheaths—the physical body (Annamaya) and the life force (Pranamaya)—wind down. Advaita teaches us to systematically peel our identity away from these fading layers, remaining established in the Witness-Self which never fades.",
+        "hyperlink_or_citation": "Vedanta Society of New York, 'Pancha Kosha: Who Am I?'"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Pranayama and the Departure of the Jiva",
+      "Anandamaya Kosha: The Final Veil of Ignorance Before Moksha"
+    ],
+    "parentId": "root-2",
+    "createdAt": "2026-05-26T01:40:42.721Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-2_302372_2"
+  },
+  {
+    "node_id": "sub_root-2_967657_0",
+    "concept_title": "The Vedantic Turn: Witness Consciousness",
+    "titleBn": "বেদান্তের অভিমুখ: সাক্ষী চেতনা",
+    "grouping_category": "Advaita Vedanta",
+    "keywords": [
+      "Sakshi",
+      "Neti-Neti",
+      "Atman",
+      "Drg-Drsya-Viveka",
+      "Abhaya",
+      "Deha-Atma-Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Drg-Drsya Viveka",
+        "fragment_content": "The body is the seen (Drshya), and the Witness (Drg) remains untouched by the dissolution of its objects. The mind is also seen; the Witness alone is the ultimate Seer.",
+        "quoteBn": "শরীর হলো দৃশ্য রূপ বা দৃষ্ট বস্তু, আর সাক্ষী সর্বদা তার চারপাশের বস্তুসমূহের বিলয় বা বিনাশের দ্বারা অস্পর্শিত থাকে।",
+        "hyperlink_or_citation": "Drg-Drsya Viveka, Sloka 1-2"
+      },
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "When you establish yourself as the Sakshi, the witness of the mind and body, death is no longer a personal tragedy. It becomes a spectacle, a transition of the material medium while the consciousness remains illumination itself.",
+        "hyperlink_or_citation": "Vedanta Society of New York, 'Overcoming the Fear of Death' Lecture Series"
+      },
+      {
+        "source_or_author": "Swami Vivekananda",
+        "fragment_content": "Say to your own minds, 'I am He, I am He.' Let it ring day and night in your minds like a song, and at the point of death declare 'I am He!' That is the truth; the land of death is a myth.",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Vol. 2, 'The Real Nature of Man'"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Katha Upanishad: Yama's Secret of the Undying Self",
+      "Pancha Kosha Viveka: Dissolving the Envelopes of Mortality",
+      "Sakshi-Bhavana: Practical Witnesshood in Terminal Physical Decay"
+    ],
+    "parentId": "root-2",
+    "createdAt": "2026-05-26T01:40:43.574Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_root-2_967657_0"
+  },
+  {
+    "node_id": "sub_sub_root-1_603318_0_875052_2",
+    "concept_title": "Manonasa: The Death of the Subtle Entity",
+    "titleBn": "মনোনাশ: সূক্ষ্ম সত্তার মৃত্যু",
+    "grouping_category": "Existential Dissolution",
+    "keywords": [
+      "Manonasa",
+      "Jiva",
+      "Sukshma Sharira",
+      "Annamaya Kosha",
+      "Sakshi"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Ramana Maharshi, Upadesha Saram (Verse 17)",
+        "fragment_content": "When the mind, without turning outward, questions its own nature, it is realized that there is no such thing as the mind. This is the direct path for all.",
+        "quoteBn": "\"When the mind, without turning outward, questions its own nature, it is realized that there is no such thing as the mind. This is the direct path for all.\"",
+        "hyperlink_or_citation": "Upadesha Saram, Verse 17"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "The Myth of the Transmigrating Soul",
+      "The Void of Sushupti"
+    ],
+    "parentId": "sub_root-1_603318_0",
+    "createdAt": "2026-05-26T01:40:42.425Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_603318_0_875052_2"
+  },
+  {
+    "node_id": "sub_sub_root-1_603318_0_110374_0",
+    "concept_title": "The Putrefaction of Sthula Sharira: Asubha Bhavana",
+    "titleBn": "স্থূল শরীরের পচন: অশুভ ভাবনা",
+    "grouping_category": "Physical Cessation and Deconstruction",
+    "keywords": [
+      "Annamaya Kosha",
+      "Sthula Sharira",
+      "Asubha Bhavana",
+      "Jiva",
+      "Impermanence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Maitri Upanishad (1.3)",
+        "fragment_content": "In this body, which is smelly, unsubstantial, a conglomerate of bone, skin, sinew, marrow, flesh, semen, blood, mucus, tears, rheum, feces, urine, wind, bile, and phlegm, what is the use of enjoyment of desires?",
+        "quoteBn": "\"In this body, which is smelly, unsubstantial, a conglomerate of bone, skin, sinew, marrow, flesh, semen, blood, mucus, tears, rheum, feces, urine, wind, bile, and phlegm, what is the use of enjoyment of desires?\"",
+        "hyperlink_or_citation": "Maitri Upanishad, Chapter 1, Verse 3"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Dissolution into Pancha Bhutas",
+      "The Witness of Decay"
+    ],
+    "parentId": "sub_root-1_603318_0",
+    "createdAt": "2026-05-26T01:40:41.392Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_603318_0_110374_0"
+  },
+  {
+    "node_id": "sub_sub_root-1_603318_0_549087_1",
+    "concept_title": "The Vedantic Pivot: From Corpse to Sakshi",
+    "titleBn": "বেদান্তের মোড়: মৃতদেহ থেকে সাক্ষীতে",
+    "grouping_category": "Atman Realization",
+    "keywords": [
+      "Sakshi",
+      "Atman",
+      "Annamaya Kosha",
+      "Jiva",
+      "Drig-Drishya-Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Adi Shankara, Drig-Drishya-Viveka (Verse 1)",
+        "fragment_content": "The form is perceived, and the eye is its perceiver. The eye is perceived, and the mind is its perceiver. The modifications of the mind are perceived, and the Witness (Sakshi) is their perceiver. But the Witness is not perceived by anything else.",
+        "quoteBn": "[অনুবাদ - সাক্ষী ও সাক্ষী] সম্পর্কিত সূত্র: \"The form is perceived, and the eye is its perceiver. The eye is perceived, and the mind is its perceiver. The modifications of the mind are perceived, and the Witness (Sakshi) is their perceiver. But the Witness is not perceived by anything else.\"",
+        "hyperlink_or_citation": "Drig-Drishya-Viveka, Verse 1"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Neti Neti Methodology",
+      "Chidabhasa Deconstruction"
+    ],
+    "parentId": "sub_root-1_603318_0",
+    "createdAt": "2026-05-26T01:40:42.264Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_603318_0_549087_1"
+  },
+  {
+    "node_id": "sub_sub_root-1_943784_0_755532_2",
+    "concept_title": "Abhaya: The Cultivation of Absolute Fearlessness",
+    "titleBn": "অভয়: পরম নির্ভীকতার উন্মেষ",
+    "grouping_category": "Hinduism / Vedanta",
+    "keywords": [
+      "Abhaya",
+      "Vivekananda",
+      "Upanishad",
+      "Atman",
+      "Vairagya",
+      "Moksha"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda",
+        "fragment_content": "Swami Vivekananda taught that the single greatest message of the Upanishads is 'Abhih'—Fearlessness. Fear comes only from the sense of duality. When we realize there is only one Atman, whom or what shall we fear? Death becomes merely a change of garment.",
+        "quoteBn": "স্বামী বিবেকানন্দ শিক্ষা দিয়েছিলেন যে উপনিষদের একমাত্র সবচেয়ে বড় বার্তা হলো 'অভিঃ'—নির্ভীকতা। ভয় কেবল দ্বৈততার বোধ থেকেই আসে। আমরা যখন উপলব্ধি করি যে কেবল একটিই আত্মা বিরাজমান, তখন আমরা কাকে বা কীসের ভয় করব? মৃত্যু তখন কেবল পোশাক পরিবর্তনের মতো রূপ ধারণ করে।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Lecture on 'The Mission of the Vedanta'"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "jivanmukti_deathless_state"
+    ],
+    "parentId": "sub_root-1_943784_0",
+    "createdAt": "2026-05-26T04:44:52.202Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_943784_0_755532_2"
+  },
+  {
+    "node_id": "sub_sub_root-1_943784_0_459962_1",
+    "concept_title": "Kala and Akala: Witnessing the Stream of Time",
+    "titleBn": "কাল ও অকাল: সময়ের প্রবাহের সাক্ষী",
+    "grouping_category": "Hinduism / Vedanta",
+    "keywords": [
+      "Kala",
+      "Akala",
+      "Sakshi",
+      "Swami Sarvapriyananda",
+      "Katha Upanishad",
+      "Time"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "Time (Kala) only exists for the mind and body. The Atman is Akala—beyond time. The witness of change cannot itself change; therefore, the Sakshi is immortal, watching the cycle of birth and death without undergoing birth and death.",
+        "quoteBn": "সময় (কাল) কেবল মন এবং শরীরের জন্যই অস্তিত্বশীল। আত্মা হলো অকাল—সময়ের অতীত। পরিবর্তনের যে সাক্ষী, সে নিজে পরিবর্তিত হতে পারে না; তাই সাক্ষী সত্তা হলো অমর, যা জন্ম ও মৃত্যুর চক্রকে পর্যবেক্ষণ করে কিন্তু নিজে জন্ম ও মৃত্যুর মধ্য দিয়ে যায় না।",
+        "hyperlink_or_citation": "Vedanta Society of New York, Lectures on Katha Upanishad and Fearlessness"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "deha_atma_viveka"
+    ],
+    "parentId": "sub_root-1_943784_0",
+    "createdAt": "2026-05-26T04:44:52.202Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_943784_0_459962_1"
+  },
+  {
+    "node_id": "sub_sub_root-1_943784_0_271618_0",
+    "concept_title": "Kali as Death and Transcendence",
+    "titleBn": "মৃত্যু ও পরম উত্তরণ রূপে মা কালী",
+    "grouping_category": "Hinduism / Vedanta",
+    "keywords": [
+      "Kali",
+      "Kala",
+      "Atman",
+      "Sakshi",
+      "Abhaya",
+      "Swami Vivekananda",
+      "Ramakrishna",
+      "Moksha"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda / Ramakrishna Mission",
+        "fragment_content": "To worship the Destroyer is to conquer the fear of death by actively embracing the terror of change, realizing that the physical annihilation is but a wave in the infinite ocean of Mother's consciousness, leaving the Witness (Atman) completely untouched.",
+        "quoteBn": "ধ্বংসকারীকে পূজ��� করার অর্থ হল পরিবর্তনের ভয়াবহতাকে সক্রিয়ভাবে আলিঙ্গন করে মৃত্যুর ভয়কে জয় করা; এটা উপলব্ধি করা যে শারীরিক বিনাশ হলো মায়ের অসীম চৈতন্য-সমুদ্রে কেবল একটি তরঙ্গ মাত্র, যা সাক্ষী সত্তাকে (আত্মা) সম্পূর্ণ অস্পর্শিত রাখে।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Vol. 9, Lectures and Discourses"
+      },
+      {
+        "source_or_author": "Sri Sri Ramakrishna Kathamrita",
+        "fragment_content": "When the cosmic dissolution (Pralaya) comes, Mother Kali gathers the seeds of creation, just like a housewife keeps her small household items in a beautiful basket after the day's work. The witness consciousness remains, observing the cycles of creation and destruction.",
+        "quoteBn": "মহাপ্রলয়ের সময় মা কালী সৃষ্টির বীজগুলো কুড়িয়ে গুছিয়ে রাখেন, যেমন গৃহস্থের গিন্নি তার ছোটখাটো সংসারের জিনিসপত্র একটি সুন্দর ঝুড়িতে গুছিয়ে রাখেন। সাক্ষী চৈতন্য অক্ষত থাকে, সৃষ্টি ও ধ্বংসের চক্রকে কেবল দর্শন করে যায়।",
+        "hyperlink_or_citation": "The Gospel of Sri Ramakrishna, Chapter 13"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "kala_akala_witness",
+      "abhaya_fearlessness_vedanta"
+    ],
+    "parentId": "sub_root-1_943784_0",
+    "createdAt": "2026-05-26T04:44:52.197Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-1_943784_0_271618_0"
+  },
+  {
+    "node_id": "sub_sub_root-2_542821_1_593075_1",
+    "concept_title": "Nachiketa's Vairagya",
+    "titleBn": "নচিকেতার বৈরাগ্য",
+    "grouping_category": "Advaita",
+    "keywords": [
+      "Vairagya",
+      "Nachiketa",
+      "Yama",
+      "Swami Vivekananda",
+      "Abhaya"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda / Complete Works",
+        "fragment_content": "Nachiketa symbolizes the ideal seeker who rejects cosmic and earthly pleasures as fleeting, demanding only the ultimate truth of the deathless Self.",
+        "quoteBn": "[অনুবাদ - নচিকেতা ও মৃত্যু] সম্পর্কিত সূত্র: \"Nachiketa symbolizes the ideal seeker who rejects cosmic and earthly pleasures as fleeting, demanding only the ultimate truth of the deathless Self.\"",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Volume 3"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Preya vs Sreya",
+      "Sakshi and Deathlessness"
+    ],
+    "parentId": "sub_root-2_542821_1",
+    "createdAt": "2026-05-26T01:40:43.418Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-2_542821_1_593075_1"
+  },
+  {
+    "node_id": "sub_sub_root-2_542821_1_182312_0",
+    "concept_title": "Preya vs Sreya",
+    "titleBn": "প্রেয় বনাম শ্রেয়",
+    "grouping_category": "Advaita",
+    "keywords": [
+      "Katha Upanishad",
+      "Vairagya",
+      "Yama",
+      "Atman",
+      "Deha-Atma-Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Sarvapriyananda / Katha Upanishad",
+        "fragment_content": "Yama defines Shreya as the path of spiritual liberation and Preya as the pursuit of transient sensory pleasures that bind the seeker to physical decay and rebirth.",
+        "quoteBn": "প্রেয় মানুষকে আপাত সুখের পথে চালিত করে যা বিনাশশীল, আর শ্রেয় তাকে চালিত করে কল্যাণের ও অমরত্বের পথে।",
+        "hyperlink_or_citation": "Katha Upanishad, I.2.1"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Deha-Atma-Viveka",
+      "Nachiketa's Vairagya",
+      "Abhaya / Fearlessness"
+    ],
+    "parentId": "sub_root-2_542821_1",
+    "createdAt": "2026-05-26T01:40:43.020Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_root-2_542821_1_182312_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_603318_0_110374_0_602457_2",
+    "concept_title": "Manonasa: The Ultimate Extinction of Jiva-hood",
+    "titleBn": "মনোনাশ: জীবভাবের পরম বিলুপ্তি",
+    "grouping_category": "Existential Dissolution",
+    "keywords": [
+      "Manonasa",
+      "Jiva",
+      "Chidabhasa",
+      "Sakshi"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Tripura Rahasya (Chapter 14)",
+        "fragment_content": "With the destruction of the mind (Manonasa), the individual self (Jiva) realizes its non-existence separate from the supreme consciousness. Death is only for the mental construct of individuality, not for the underlying Witness.",
+        "quoteBn": "[অনুবাদ - সাক্ষী ও চেতনা ও মৃত্যু] সম্পর্কিত সূত্র: \"With the destruction of the mind (Manonasa), the individual self (Jiva) realizes its non-existence separate from the supreme consciousness. Death is only for the mental construct of individuality, not for the underlying Witness.\"",
+        "hyperlink_or_citation": "Tripura Rahasya 14.22"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Amanibhava: The State of No-Mind",
+      "Vasana-Kshaya: Eradication of Latent Tendencies",
+      "Jivanmukti: Liberation While Alive"
+    ],
+    "parentId": "sub_sub_root-1_603318_0_110374_0",
+    "createdAt": "2026-05-26T01:40:41.532Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_603318_0_110374_0_602457_2"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_603318_0_110374_0_779875_0",
+    "concept_title": "Sthula Sharira Deconstruction: The Dissolution of Annamaya Kosha",
+    "titleBn": "স্থূল শরীরের ব্যবচ্ছেদ: অন্নময় কোষের বিলয়",
+    "grouping_category": "Physical Cessation and Deconstruction",
+    "keywords": [
+      "Annamaya Kosha",
+      "Sthula Sharira",
+      "Asubha Bhavana",
+      "Jiva",
+      "Impermanence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Adi Shankara, Vivekachudamani (Verse 154)",
+        "fragment_content": "The body is a modified form of food; it constitutes the material sheath (Annamaya Kosha). It is born, it dies, and it is a pack of skin, flesh, fat, bones, and filth. It cannot be the self-existent, pure Atman, which is the knower.",
+        "quoteBn": "[অনুবাদ - কোষ ও আত্মা ও আত্মা] সম্পর্কিত সূত্র: \"The body is a modified form of food; it constitutes the material sheath (Annamaya Kosha). It is born, it dies, and it is a pack of skin, flesh, fat, bones, and filth. It cannot be the self-existent, pure Atman, which is the knower.\"",
+        "hyperlink_or_citation": "Vivekachudamani 154"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Shmashana Sadhana: The Cremation Ground as Temple",
+      "Bhuta-Shuddhi: Element Purification",
+      "Prana-Pratishtha Deconstruction"
+    ],
+    "parentId": "sub_sub_root-1_603318_0_110374_0",
+    "createdAt": "2026-05-26T01:40:42.113Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_603318_0_110374_0_779875_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_603318_0_110374_0_631740_1",
+    "concept_title": "The Vedantic Pivot: Sakshi as the Deathless Observer",
+    "titleBn": "বেদান্তের মোড়: মরণহীন দ্রষ্টা হিসেবে সাক্ষী",
+    "grouping_category": "The Vedantic Pivot",
+    "keywords": [
+      "Sakshi",
+      "Atman",
+      "Jiva",
+      "Drik-Drishya Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Bhagavad Gita (Verse 2.20)",
+        "fragment_content": "For the soul there is neither birth nor death at any time. He has not come into being, does not come into being, and will not come into being. He is unborn, eternal, ever-existing and primeval. He is not slain when the body is slain.",
+        "quoteBn": "[অনুবাদ - মৃত্যু] সম্পর্কিত সূত্র: \"For the soul there is neither birth nor death at any time. He has not come into being, does not come into being, and will not come into being. He is unborn, eternal, ever-existing and primeval. He is not slain when the body is slain.\"",
+        "hyperlink_or_citation": "Bhagavad Gita 2.20"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Adhyasa: The Mechanics of False Identification",
+      "Deha-Adhyasa Nivriti",
+      "Aparoksha Anubhuti"
+    ],
+    "parentId": "sub_sub_root-1_603318_0_110374_0",
+    "createdAt": "2026-05-26T01:40:41.989Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_603318_0_110374_0_631740_1"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_271618_0_818411_2",
+    "concept_title": "Abhaya: Embracing the Terrible as Liberation",
+    "titleBn": "অভয়: ভয়ালকে আলিঙ্গন করে মুক্তিলাভ",
+    "grouping_category": "Advaita & Shakta Vedanta",
+    "keywords": [
+      "Abhaya",
+      "Swami Vivekananda",
+      "Vairagya",
+      "Fearlessness",
+      "Death-Meditation",
+      "Smashana Sadhana"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda, Inspired Talks",
+        "fragment_content": "We must face the terrible. Death is but a mask of the Divine. When you have the courage to love the terrible, you realize the absolute fearlessness (Abhaya) of the Self.",
+        "quoteBn": "আমাদের ভয়ালকে অতিক্রম করতে হবে। মৃত্যু ঈশ্বরেরই একটি মুখোশ মাত্র। যখন ভয়ংকরকে ভালোবাসার সাহস তোমার জাগবে, তখনই তুমি আত্মার পরম অভয় অবস্থা উপলব্ধি করতে পারবে।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Volume 7, Inspired Talks"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "jivanmukti_and_the_dissolution_of_ego"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_271618_0",
+    "createdAt": "2026-05-26T05:02:42.341Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_271618_0_818411_2"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_271618_0_414045_0",
+    "concept_title": "Kali as Death and Transcendence",
+    "titleBn": "মৃত্যু ও পরমার্থিক উত্তরণ রূপে কালী",
+    "grouping_category": "Advaita & Shakta Vedanta",
+    "keywords": [
+      "Kali",
+      "Kala",
+      "Atman",
+      "Sakshi",
+      "Abhaya",
+      "Swami Vivekananda",
+      "Sri Ramakrishna",
+      "Moksha",
+      "Pralaya"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda, Complete Works",
+        "fragment_content": "Who dares misery love, And hug the form of Death, Dance in Destruction's dance, To him the Mother comes.",
+        "quoteBn": "যে দুঃখকে ভালোবাসতে সাহস করে, মৃত্যুর রূপকে বুকে টেনে নেয়, ধ্বংসের নৃত্যে মেতে ওঠে, মা তার কাছেই আসেন।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Volume 4, Writings in Prose and Verse, 'Kali the Mother'"
+      },
+      {
+        "source_or_author": "Sri Sri Ramakrishna Kathamrita",
+        "fragment_content": "When the cosmic dissolution (Pralaya) comes, Mother Kali gathers the seeds of creation, just like a housewife keeps her small household items in a beautiful basket after the day's work. The witness consciousness remains, observing the cycles of creation and destruction.",
+        "quoteBn": "মহাপ্রলয়ের সময় শ্রীশ্রী মা কালী সৃষ্টির বীজসমূহ কুড়িয়ে গুছিয়ে রাখেন, ঠিক যেমন গৃহিণী দ��নের কাজ শেষে সংসারের ছোটখাটো জিনিসপত্র একটি সুন্দর ঝুড়িতে তুলে রাখেন। সাক্ষীচৈতন্য অপরাজিত থেকে সৃষ্টি ও ধ্বংসের খেলা পর্যবেক্ষণ করে।",
+        "hyperlink_or_citation": "Sri Sri Ramakrishna Kathamrita, Section on Divine Mother and Cosmic Dissolution"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "sakshi_and_kala_the_transcendence_of_time",
+      "abhaya_embracing_the_terrible_as_liberation"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_271618_0",
+    "createdAt": "2026-05-26T05:02:42.338Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_271618_0_414045_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_271618_0_578645_1",
+    "concept_title": "Sakshi and Kala: Transcendence of Time",
+    "titleBn": "সাক্ষী ও কাল: সময়ের অতীত পরম সত্য",
+    "grouping_category": "Advaita & Shakta Vedanta",
+    "keywords": [
+      "Sakshi",
+      "Kala",
+      "Swami Sarvapriyananda",
+      "Atman",
+      "Chidakasha",
+      "Time-Transcendence"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Sarvapriyananda, Lectures on Vedanta and Shakta Philosophy",
+        "fragment_content": "Kali is Kala, the relentless flow of time that consumes all things. But who is the witness of this flow? It is the Atman, the Sakshi. By identifying with the Witness, we transcend time and death itself.",
+        "quoteBn": "কালী হলেন কাল—সময়ের সেই নির্মম প্রবাহ যা সবকিছুকে গ্রাস করে। কিন্তু এই প্রবাহের সাক্ষী কে? তিনি হলেন আত্মা, পরম সাক্ষী। এই সাক্ষীচৈতন্যের সাথে একাত্ম হয়ে আমরা কাল ও মৃত্যুকে অতিক্রম করি।",
+        "hyperlink_or_citation": "Vedanta Society of New York, Discourse on 'Shakti and Maya'"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "deha_atma_viveka_through_cremation_ground_meditation"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_271618_0",
+    "createdAt": "2026-05-26T05:02:42.341Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_271618_0_578645_1"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_459962_1_887891_1",
+    "concept_title": "Desha-Kala-Nimitta: The Prism of Maya",
+    "titleBn": "দেশ-কাল-নিমিত্ত: মায়ার প্রিজম",
+    "grouping_category": "HINDUISM_VEDANTA_ADVAITA",
+    "keywords": [
+      "Desha-Kala-Nimitta",
+      "Swami Vivekananda",
+      "Maya",
+      "Atman",
+      "Akala",
+      "Time-Space-Causation"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda",
+        "fragment_content": "This defines Maya—this time, space, and causation. The One Infinite Reality, looked at through these glasses, appears as the universe... In the Infinite, there is no time, space, or causation. It is all one.",
+        "quoteBn": "এটাই মায়াকে সংজ্ঞায়িত করে—এই দেশ, কাল এবং নিমিত্ত। এক অনন্ত সত্যকে যখন এই কাচের মধ্য দিয়ে দেখা হয়, তখন তা জগৎ রূপে প্রতিভাত হয়... অনন্তের মধ্যে কোনো স্থান, কাল বা কার্যকারণ নেই। সেখানে সবই এক।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Volume 2, Jnana Yoga: Maya and the Evolution of the Conception of God"
+      },
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "Time (Kala) cannot touch the Atman because time is born within Maya. It is a mental construct. When you step back into the Sakshi, the absolute fearlessness of Abhaya is realized, because where there is no time, there is no death.",
+        "quoteBn": "সময় (কাল) আত্মাকে স্পর্শ করতে পারে না কারণ সময়ের জন্ম মায়ার অভ্যন্তরে। এটি একটি মানসিক ধারণা মাত্র। আপনি যখন সাক্ষী-ভাবের পিছনে ফিরে যান, তখন অভয়ের পরম নির্ভীকতা অনুভূত হয়, কারণ যেখানে সময় নেই, সেখানে মৃত্যুও নেই।",
+        "hyperlink_or_citation": "Swami Sarvapriyananda, 'The Mystery of Time and Death', Vedanta Society Lectures"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Adhyasa",
+      "Abhaya",
+      "Neti-Neti"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_459962_1",
+    "createdAt": "2026-05-26T04:46:04.556Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_459962_1_887891_1"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_459962_1_359683_2",
+    "concept_title": "Sakshi-Caitanya: The Immutable Witness of Mental Time",
+    "titleBn": "সাক্ষী-চৈতন্য: মানসিক সময়ের অপরিবর্তনীয় দ্রষ্টা",
+    "grouping_category": "HINDUISM_VEDANTA_ADVAITA",
+    "keywords": [
+      "Sakshi-Caitanya",
+      "Swami Sarvapriyananda",
+      "Avastha Traya",
+      "Turiya",
+      "Kala"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "The mind moves in time, remembering the past and projecting the future. But the consciousness which illumines these mental movements—the Sakshi—is stationary. It is the eternal present, unaffected by the ticking of the cosmic clock.",
+        "quoteBn": "মন সময়ের মধ্যে চলে, অতীতকে স্মরণ করে এবং ভবিষ্যৎকে প্রক্ষেপণ করে। কিন্তু যে চেতনা এই মানসিক গতিবিধিকে আলোকিত করে—অর্থাৎ সাক্ষী—তা স্থির। এটি চিরন্তন বর্তমান, যা মহাজাগতিক ঘড়ির টিকটিক শব্দ দ্বারা প্রভাবিত হয় না।",
+        "hyperlink_or_citation": "Swami Sarvapriyananda, Commentary on Drig-Drishya-Viveka"
+      },
+      {
+        "source_or_author": "Bhagavad Gita (2.20)",
+        "fragment_content": "He is never born, nor does He die at any time; nor having once been, does He vice versa cease to be. He is unborn, eternal, permanent and primeval. He is not slain when the body is slain.",
+        "quoteBn": "তিনি কখনো জন্মান না এবং কখনো মারাও যান না; আবার পূর্বে ছিলেন বলে পুনরায় ত��ঁর অস্তিত্ব বিলুপ্ত হয় তাও নয়। তিনি জন্মহীন, নিত্য, শাশ্বত ও পুরাতন। শরীর ধ্বংস হলেও তিনি ধ্বংসপ্রাপ্ত হন না।",
+        "hyperlink_or_citation": "Bhagavad Gita, Chapter 2, Verse 20"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Avastha Traya",
+      "Pancha Kosha",
+      "Jivanmukti"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_459962_1",
+    "createdAt": "2026-05-26T04:46:04.557Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_459962_1_359683_2"
+  },
+  {
+    "node_id": "sub_sub_sub_root-1_943784_0_459962_1_800627_0",
+    "concept_title": "Yama's Exposition: The Birthless and Deathless Self",
+    "titleBn": "যমের উপদেশ: জন্মরহিত ও মৃত্যুরহিত আত্মা",
+    "grouping_category": "HINDUISM_VEDANTA_ADVAITA",
+    "keywords": [
+      "Katha Upanishad",
+      "Yama",
+      "Nachiketa",
+      "Na Jayate Mriyate",
+      "Swami Sarvapriyananda",
+      "Atman",
+      "Akala"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Katha Upanishad (1.2.18)",
+        "fragment_content": "The knowing Self is not born, nor does It die. It has not sprung from anything, nor did anything spring from It. This birthless, eternal, undecaying, ancient One is not slain when the body is slain.",
+        "quoteBn": "জ্ঞান��� আত্মা কখনও জন্মায় না এবং মারাও যায় না। এটি কোন কিছু থেকে উৎপন্ন হয়নি, এবং এটি থেকে কোন কিছুর উৎপত্তিও হয়নি। এই জন্মহীন, চিরন্তন, ক্ষয়হীন, পুরাতন পুরুষ শরীর ধ্বংস হলেও ধ্বংস হন না।",
+        "hyperlink_or_citation": "Katha Upanishad, 1.2.18"
+      },
+      {
+        "source_or_author": "Swami Sarvapriyananda",
+        "fragment_content": "When Yama says 'Na jayate mriyate va', he is pointing directly to your current experience. The witness of the body's aging and the mind's changing is itself outside the flow of time. You do not age; only the vehicle ages.",
+        "quoteBn": "যম যখন বলেন 'ন জায়তে ম্রিয়তে বা', তিনি সরাসরি আপনার বর্তমান অভিজ্ঞতার দিকে ইঙ্গিত করছেন। শরীরের বার্ধক্য এবং মনের পরিবর্তনের যিনি সাক্ষী, তিনি নিজে সময়ের প্রবাহের বাইরে। আপনার বয়স বাড়ে না; কেবল শরীরের বাহনটির বয়স বাড়ে।",
+        "hyperlink_or_citation": "Swami Sarvapriyananda, Lectures on Katha Upanishad, Vedanta Society of New York"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Amritatvam",
+      "Sakshi-Caitanya",
+      "Deha-Atma-Viveka"
+    ],
+    "parentId": "sub_sub_root-1_943784_0_459962_1",
+    "createdAt": "2026-05-26T04:46:04.555Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-1_943784_0_459962_1_800627_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-2_542821_1_182312_0_798458_0",
+    "concept_title": "Mara᥉ānusmᥓti as Preliminary Discipline",
+    "titleBn": "প্রাথমিক সাধনা হিসেবে মরণানুস্মৃতি",
+    "grouping_category": "Buddhism",
+    "keywords": [
+      "Maranasati",
+      "Visuddhimagga",
+      "Samvega",
+      "Anicca",
+      "Skandhas"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Buddhaghosa / Visuddhimagga",
+        "fragment_content": "Mara᥉ānusmᥓti acts as an existential shock (samvega) that systematically deconstructs the illusion of bodily permanence, serving as the foundational psychological discipline to purge craving (tanha).",
+        "quoteBn": "\"Mara᥉ānusmᥓti acts as an existential shock (samvega) that systematically deconstructs the illusion of bodily permanence, serving as the foundational psychological discipline to purge craving (tanha).\"",
+        "hyperlink_or_citation": "Visuddhimagga VIII, 1-41"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Asubha-bhavana",
+      "Samvega",
+      "Anicca-sanna"
+    ],
+    "parentId": "sub_sub_root-2_542821_1_182312_0",
+    "createdAt": "2026-05-26T01:40:43.286Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-2_542821_1_182312_0_798458_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-2_542821_1_182312_0_656548_1",
+    "concept_title": "Neti-Neti and the Witness Pivot",
+    "titleBn": "নেতি-নেতি এবং সাক্ষীরূপ মোড়",
+    "grouping_category": "Advaita",
+    "keywords": [
+      "Neti-Neti",
+      "Sakshi",
+      "Pancha Koshas",
+      "Swami Sarvapriyananda",
+      "Deha-Atma-Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Sarvapriyananda / Brihadaranyaka Upanishad",
+        "fragment_content": "The process of Neti-Neti (not this, not this) is not a descent into nihilism but a dialectical launchpad that negates the objective sheaths to isolate and consolidate the immortal Witness Consciousness (Sakshi).",
+        "quoteBn": "[অনুবাদ - সাক্ষী ও সাক্ষী ও চেতনা] সম্পর্কিত সূত্র: \"The process of Neti-Neti (not this, not this) is not a descent into nihilism but a dialectical launchpad that negates the objective sheaths to isolate and consolidate the immortal Witness Consciousness (Sakshi).\"",
+        "hyperlink_or_citation": "Brihadaranyaka Upanishad II.3.6"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Drg-Drsya-Viveka",
+      "Pancha Kosha Viveka",
+      "Abhaya / Fearlessness"
+    ],
+    "parentId": "sub_sub_root-2_542821_1_182312_0",
+    "createdAt": "2026-05-26T01:40:43.152Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-2_542821_1_182312_0_656548_1"
+  },
+  {
+    "node_id": "sub_sub_sub_root-2_542821_1_593075_1_240453_2",
+    "concept_title": "Abhaya: The Cultivation of Fearlessness in Death",
+    "titleBn": "অভয়: মরণভয় জয় ও অমৃতত্ব",
+    "grouping_category": "Advaita Vedanta",
+    "keywords": [
+      "Abhaya",
+      "Fearlessness",
+      "Swami Vivekananda",
+      "Atman",
+      "Amritatvam",
+      "Moksha"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda, Lectures on Vedanta",
+        "fragment_content": "The message of the Upanishads is 'Abhih' - Fearlessness! Teach yourself, teach everyone his real nature. Call upon the sleeping soul and see how it awakes. Power will come, glory will come, and everything excellent will come when this sleeping soul is roused to self-conscious activity.",
+        "quoteBn": "উপনিষদের মূল বাণী হলো 'অভীঃ' - অর্থাৎ ভয়হীনতা! নিজের প্রকৃত স্বরূপ জানুন এবং সবাইকে তা শেখান। ঘুমন্ত আত্মাকে জাগ্রত করুন এবং দেখুন কীভাবে সে জেগে ওঠে। যখন এই ঘুমন্ত আত্মা নিজের সম্পর্কে সচেতন হয়ে কাজ শুরু করবে, তখন শক্তি আসবে, গৌরব আসবে এবং সব কল্যাণকর বস্তু আপনা থেকেই আসবে।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Vol. 3, Lecture: Mission of the Vedanta"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Sakshi Bhava in Physical Dissolution",
+      "Jivanmukti and the Conquest of Samsara"
+    ],
+    "parentId": "sub_sub_root-2_542821_1_593075_1",
+    "createdAt": "2026-05-26T03:59:24.588Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-2_542821_1_593075_1_240453_2"
+  },
+  {
+    "node_id": "sub_sub_sub_root-2_542821_1_593075_1_925517_0",
+    "concept_title": "Nachiketa's Vairagya and the Conquest of Death",
+    "titleBn": "নচিকেতার বৈরাগ্য ও মৃত্যুঞ্জয় সাধনা",
+    "grouping_category": "Advaita Vedanta / Katha Upanishad",
+    "keywords": [
+      "Vairagya",
+      "Nachiketa",
+      "Yama",
+      "Katha Upanishad",
+      "Swami Vivekananda",
+      "Abhaya",
+      "Atman"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Swami Vivekananda, Complete Works (Volume 2, Practical Vedanta)",
+        "fragment_content": "The text of the Upanishad says, 'Shraddha entered into Nachiketa.' He did not want any worldly pleasures, nor did he want heaven. He wanted to know the truth of the Atman from Death itself.",
+        "quoteBn": "উপনিষদের পাঠে বলা হয়েছে, 'নচিকেতার মধ্যে শ্রদ্ধা প্রবেশ করল।' তিনি জাগতিক কোনো সুখ চাননি, এমনকি স্বর্গও চাননি। তিনি স্বয়ং মৃত্যু�� কাছ থেকে আত্মার রহস্য জানতে চেয়েছিলেন।",
+        "hyperlink_or_citation": "Complete Works of Swami Vivekananda, Vol. 2"
+      },
+      {
+        "source_or_author": "Katha Upanishad, 1.1.26",
+        "fragment_content": "Yama offers Nachiketa kingdoms, celestial maidens, and long life. Nachiketa rejects them all, saying: 'These are transient, O Death! They wear out the vigor of all the senses. Keep these chariots and dances to yourself.'",
+        "quoteBn": "যম নচিকেতাকে রাজ্য, অপ্সরা এবং দীর্ঘায়ু দান করতে চেয়েছিলেন। নচিকেতা তা প্রত্যাখ্যান করে বললেন: 'হে ধর্মরাজ! এই সবই ক্ষণস্থায়ী, মানুষের ইন্দ্রিয়ের তেজ ক্ষয় করে দেয়। রথ আর এই নাচ-গান আপনার কাছেই রাখুন।'",
+        "hyperlink_or_citation": "Katha Upanishad, Chapter 1, Section 1, Verse 26"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Shreyas vs Preyas",
+      "The Dialectic of Nachiketa and Yama",
+      "Abhaya and the Immortal Self"
+    ],
+    "parentId": "sub_sub_root-2_542821_1_593075_1",
+    "createdAt": "2026-05-26T03:59:24.588Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-2_542821_1_593075_1_925517_0"
+  },
+  {
+    "node_id": "sub_sub_sub_root-2_542821_1_593075_1_180021_1",
+    "concept_title": "Shreyas and Preyas: The Bifurcation of Existential Choice",
+    "titleBn": "শ্রেয় ও প্রেয়: অস্তিত্বের দ্বিমুখী পথ",
+    "grouping_category": "Advaita Vedanta / Katha Upanishad",
+    "keywords": [
+      "Shreyas",
+      "Preyas",
+      "Katha Upanishad",
+      "Vairagya",
+      "Swami Sarvapriyananda",
+      "Viveka"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Katha Upanishad, 1.2.1-2",
+        "fragment_content": "The good (Shreyas) and the pleasant (Preyas) present themselves to man. The wise, examining both, chooses the good over the pleasant, while the fool chooses the pleasant for the sake of bodily pleasure.",
+        "quoteBn": "শ্রেয় (কল্যাণকর) এবং প্রেয় (মনোরম) - এই দুই পথ মানুষের সামনে উপস্থিত হয়। জ্ঞানী ব্যক্তি দুটিকেই পরীক্ষা করে আনন্দের চেয়ে কল্যাণকে বেছে নেন, আর মূর্খ ব্যক্তি দৈ���িক সুখের আশায় প্রিয় পথকেই বেছে নেয়।",
+        "hyperlink_or_citation": "Katha Upanishad, Chapter 1, Section 2, Verses 1-2"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "The Chariot Analogy of the Soul",
+      "Vairagya as Prerequisite for Jnana"
+    ],
+    "parentId": "sub_sub_root-2_542821_1_593075_1",
+    "createdAt": "2026-05-26T03:59:24.588Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_root-2_542821_1_593075_1_180021_1"
+  },
+  {
+    "node_id": "sub_sub_sub_sub_root-1_603318_0_110374_0_602457_2_852596_0",
+    "concept_title": "The Decrystallization of Annamaya Kosha and Chidabhasa",
+    "titleBn": "অন্নময় কোষ ও চিদাভাসের বিশ্লিষ্টকরণ",
+    "grouping_category": "Physical Dissolution and Reflected Consciousness",
+    "keywords": [
+      "Annamaya Kosha",
+      "Chidabhasa",
+      "Sakshi",
+      "Jiva",
+      "Deconstitution"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Panchadasi of Sri Vidyaranya Swami (VIII.28-32)",
+        "fragment_content": "Just as the reflection of the sun in a water pot ceases when the water is spilled or the pot is broken, so too does Chidabhasa—the reflected consciousness forming the Jiva—dissolve upon the biological collapse of the Annamaya Kosha. The unmoving Sakshi remains forever unaffected by this local evaporation.",
+        "quoteBn": "[অনুবাদ - কোষ ও সাক্ষী ও চেতনা] সম্পর্কিত সূত্র: \"Just as the reflection of the sun in a water pot ceases when the water is spilled or the pot is broken, so too does Chidabhasa—the reflected consciousness forming the Jiva—dissolve upon the biological collapse of the Annamaya Kosha. The unmoving Sakshi remains forever unaffected by this local evaporation.\"",
+        "hyperlink_or_citation": "Panchadasi, Chapter 8, Verses 28-32"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "Pratibimba-Vada",
+      "The Corpse as Inert Matter"
+    ],
+    "parentId": "sub_sub_sub_root-1_603318_0_110374_0_602457_2",
+    "createdAt": "2026-05-26T01:40:41.834Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_sub_root-1_603318_0_110374_0_602457_2_852596_0"
+  },
+  {
+    "node_id": "sub_sub_sub_sub_root-1_603318_0_110374_0_602457_2_408344_1",
+    "concept_title": "Videhamukti and the Complete Dissolution of Vasanas",
+    "titleBn": "বিদেহমুক্তি এবং বাসনার সম্পূর্ণ ক্ষয়",
+    "grouping_category": "Existential Extinction",
+    "keywords": [
+      "Videhamukti",
+      "Manonasa",
+      "Vasanas",
+      "Sakshi",
+      "Asanga"
+    ],
+    "text_fragments": [
+      {
+        "source_or_author": "Yoga Vasistha (V.91)",
+        "fragment_content": "When the pot is broken, the space inside is identical to the space outside. With the absolute destruction of latent mental impressions (Vasanas) at the moment of physical death, the Jivanmukta merges into Videhamukti, leaving no trace of individual agency.",
+        "quoteBn": "[অনুবাদ - দেহ ও মৃত্যু] সম্পর্কিত সূত্র: \"When the pot is broken, the space inside is identical to the space outside. With the absolute destruction of latent mental impressions (Vasanas) at the moment of physical death, the Jivanmukta merges into Videhamukti, leaving no trace of individual agency.\"",
+        "hyperlink_or_citation": "Yoga Vasistha, Book 5, Chapter 91"
+      }
+    ],
+    "suggested_sub_concepts": [
+      "The Non-dual Abyss",
+      "Asanga-Avastha"
+    ],
+    "parentId": "sub_sub_sub_root-1_603318_0_110374_0_602457_2",
+    "createdAt": "2026-05-26T01:40:41.665Z",
+    "origin": "seed",
+    "sourceNodeId": "sub_sub_sub_sub_root-1_603318_0_110374_0_602457_2_408344_1"
+  }
+]

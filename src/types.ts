@@ -15,4 +15,7 @@ export interface ConceptNode {
   parentId?: string; // Optional parent link for flat store/recursive mapping
   children?: ConceptNode[]; // Reconstructed tree kids
   titleBn?: string;
+  origin?: "seed" | "anonymous_ai";
+  createdAt?: string;
+  sourceNodeId?: string;
 }
