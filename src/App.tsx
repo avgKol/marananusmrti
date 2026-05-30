@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { initialNodes } from "./data";
 import { ConceptNode } from "./types";
 import { ConceptNodeView } from "./components/ConceptNodeView";
+import { ResearchExplorerPanel, ReadingDeskPanel } from "./components/ResearchWorkspacePanels";
 import { analyzeFocusVector, filterFocusedTree, sanitizeBengaliText } from "./utils/focusAnalysis";
 import ReactMarkdown from "react-markdown";
 import { 
@@ -19,6 +20,9 @@ import {
   saveNodeToFirestore, 
   reconstructTreeView 
 } from "./firestoreUtils";
+import {
+  buildResearchIndex,
+} from "./utils/researchIndex";
 import { 
   exportToGoogleDrive, 
   listDriveJsonFiles, 
@@ -51,18 +55,27 @@ import {
 import { User } from "firebase/auth";
 import { motion, AnimatePresence } from "motion/react";
 
+type WorkspaceMode = "graph" | "explorer" | "reading";
+type ExplorerFacet = "keywords" | "quotes" | "sources";
+
 export default function App() {
   // Core state: local tree of nodes
   const [nodes, setNodes] = useState<ConceptNode[]>(initialNodes);
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [showOnlyFocused, setShowOnlyFocused] = useState(false);
-  const [readingMode, setReadingMode] = useState(false);
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>("graph");
+  const [explorerFacet, setExplorerFacet] = useState<ExplorerFacet>("keywords");
+  const [explorerQuery, setExplorerQuery] = useState("");
 
   // Compute focus analysis for concept-lens
   const focusResult = useMemo(() => {
     return analyzeFocusVector(nodes, activeKeyword);
   }, [nodes, activeKeyword]);
+
+  const researchIndex = useMemo(() => {
+    return buildResearchIndex(nodes);
+  }, [nodes]);
 
   const renderedNodes = useMemo(() => {
     if (showOnlyFocused && activeKeyword) {
@@ -127,13 +140,19 @@ export default function App() {
       content: `### Welcome to the Marana-Lab Desk
 Greetings, researcher. I am your specialized AI Comparative Philology Assistant.
 
-Our workspace hosts a recursive conceptual graph that traces perspectives on death, impermanence, and liberation:
+Our workspace now has three research modes that trace perspectives on death, impermanence, and liberation:
+* **Graph** for spatial orientation through the conceptual constellation.
+* **Explorer** for keyword, quote, and source retrieval.
+* **Reading Desk** for deep inspection of one concept at a time.
+
+The corpus remains centered on:
 * **Buddhist deconstruction** of the self through physical cessation (*Maraṇānusmṛti*, *Anicca*, and *Skandhas*).
 * **The Vedantic consolidation** of the absolute witness consciousness (*Sakshi*, *Atman*, and *Neti-Neti*).
 
 **Operations:**
-1. Click any concept card on the right to inspect its full scriptural fragments and commentary under the **Provenance** desk.
-2. Select one of the quick research topics below or converse with me directly about any selected concepts.`
+1. Switch between Graph, Explorer, and Reading Desk using the top workspace controls.
+2. Click any concept, keyword, quote, or source to jump into the full concept record and provenance.
+3. Select one of the quick research topics below or converse with me directly about any selected concepts.`
     }
   ]);
   const [chatLoading, setChatLoading] = useState(false);
@@ -340,6 +359,68 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
 
   const selectedNode = selectedNodeId ? findNodeById(nodes, selectedNodeId) : null;
 
+  const normalizedResearchQuery = explorerQuery.trim().toLowerCase();
+  const normalizeToken = (value: string | undefined | null) => (value || "").toLowerCase().trim();
+
+  const explorerKeywordEntries = useMemo(() => {
+    const entries = researchIndex.keywords.filter((entry) => {
+      if (!normalizedResearchQuery) return true;
+      const searchable = [
+        entry.keyword,
+        ...entry.conceptTitles,
+      ].join(" ").toLowerCase();
+      return searchable.includes(normalizedResearchQuery);
+    });
+    return entries.slice(0, 40);
+  }, [researchIndex.keywords, normalizedResearchQuery]);
+
+  const explorerFragmentEntries = useMemo(() => {
+    const entries = researchIndex.fragments.filter((entry) => {
+      if (!normalizedResearchQuery) return true;
+      const searchable = [
+        entry.conceptTitle,
+        entry.titleBn || "",
+        entry.sourceOrAuthor,
+        entry.quote,
+        entry.quoteBn || "",
+        entry.citation,
+        entry.keywords.join(" "),
+      ].join(" ").toLowerCase();
+      return searchable.includes(normalizedResearchQuery);
+    });
+    return entries.slice(0, 40);
+  }, [researchIndex.fragments, normalizedResearchQuery]);
+
+  const explorerSourceEntries = useMemo(() => {
+    const entries = researchIndex.sources.filter((entry) => {
+      if (!normalizedResearchQuery) return true;
+      const searchable = [
+        entry.sourceOrAuthor,
+        entry.conceptTitles.join(" "),
+      ].join(" ").toLowerCase();
+      return searchable.includes(normalizedResearchQuery);
+    });
+    return entries.slice(0, 40);
+  }, [researchIndex.sources, normalizedResearchQuery]);
+
+  const selectedRelatedConcepts = useMemo(() => {
+    if (!selectedNode) return [];
+    const selectedKeywords = new Set(selectedNode.keywords.map(normalizeToken));
+    return researchIndex.flatNodes
+      .filter((node) => node.node_id !== selectedNode.node_id)
+      .map((node) => {
+        const sharedKeywords = node.keywords.filter((kw) => selectedKeywords.has(normalizeToken(kw)));
+        return {
+          node,
+          sharedKeywords,
+          sharedCount: sharedKeywords.length,
+        };
+      })
+      .filter((item) => item.sharedCount > 0)
+      .sort((a, b) => b.sharedCount - a.sharedCount || a.node.concept_title.localeCompare(b.node.concept_title))
+      .slice(0, 8);
+  }, [researchIndex.flatNodes, selectedNode]);
+
   // Handles updates to tree nodes recursively while avoiding duplication
   const updateNodeChildrenRecursive = (
     currentNodes: ConceptNode[],
@@ -406,6 +487,16 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
     setActiveKeyword((prev) => (prev === kw ? null : kw));
   };
 
+  const handleExplorerKeywordSelect = (kw: string) => {
+    setExplorerQuery(kw);
+    setExplorerFacet("keywords");
+    setActiveKeyword(kw);
+  };
+
+  const handleExplorerOpenConcept = (nodeId: string, keyword?: string) => {
+    handleOpenNodeFromResearch(nodeId, keyword);
+  };
+
   const handleScrollToFocusCategory = (category: "direct" | "strong" | "bridge") => {
     const match = Object.values(focusResult.indexedNodes).find(
       (idx) => idx.classification === category
@@ -426,6 +517,29 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
   const handleSelectNode = (nodeId: string) => {
     setSelectedNodeId(nodeId);
     setLeftTab("evidence"); // Auto focus commentary for quick study
+    setWorkspaceMode("reading");
+  };
+
+  const handleOpenGraph = () => {
+    setWorkspaceMode("graph");
+  };
+
+  const handleOpenExplorer = () => {
+    setWorkspaceMode("explorer");
+  };
+
+  const handleFocusKeywordInGraph = (keyword: string) => {
+    setActiveKeyword(keyword);
+    setShowOnlyFocused(true);
+    setWorkspaceMode("graph");
+    setLeftTab("evidence");
+  };
+
+  const handleOpenNodeFromResearch = (nodeId: string, keyword?: string) => {
+    if (keyword) {
+      setActiveKeyword(keyword);
+    }
+    handleSelectNode(nodeId);
   };
 
   const isConceptTitleDuplicate = (nodesList: ConceptNode[], title: string): boolean => {
@@ -639,6 +753,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
   };
 
   const totalsObj = getTotals(nodes);
+  const readingMode = workspaceMode === "reading";
   const precisionRatio = useMemo(() => {
     if (totalsObj.count === 0) return 0;
     return visibleCount / totalsObj.count;
@@ -723,6 +838,28 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
               Comparative Metaphysical Mapping Desk // Death studies in Buddhism and Hinduism
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-[#11131b] border border-slate-800 rounded-lg p-1 self-start md:self-auto">
+          {(
+            [
+              { key: "graph", label: "Graph" },
+              { key: "explorer", label: "Explorer" },
+              { key: "reading", label: "Reading Desk" },
+            ] as const
+          ).map((mode) => (
+            <button
+              key={mode.key}
+              onClick={() => setWorkspaceMode(mode.key)}
+              className={`px-3.5 py-2 rounded-md text-xs font-sans font-semibold transition-all cursor-pointer ${
+                workspaceMode === mode.key
+                  ? "bg-amber-950/35 text-amber-300 border border-amber-900/40 shadow-[0_0_0_1px_rgba(245,158,11,0.08)]"
+                  : "text-slate-400 hover:text-slate-100 hover:bg-slate-900/40 border border-transparent"
+              }`}
+            >
+              {mode.label}
+            </button>
+          ))}
         </div>
 
         {/* Quick analytics widgets */}
@@ -1247,7 +1384,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                 ) : (
                   <div className="text-center py-16 text-slate-400 space-y-3">
                     <Info size={32} className="mx-auto text-slate-600" />
-                    <p className="text-sm font-sans leading-relaxed max-w-[320px] mx-auto">No conceptual node has been selected yet. Highlight nodes on the right graph to expand commentary documents.</p>
+                  <p className="text-sm font-sans leading-relaxed max-w-[320px] mx-auto">No conceptual node has been selected yet. Open a concept from the graph, explorer, or reading desk to expand commentary documents.</p>
                   </div>
                 )}
               </div>
@@ -1326,7 +1463,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                 {/* Informational project notes */}
                 <div className="p-5 bg-slate-900/30 border border-slate-800/40 rounded-lg text-sm font-sans text-slate-400 leading-relaxed">
                   <span className="text-xs text-slate-405 font-bold block uppercase mb-1.5">Methodology Note</span>
-                  The dual methodologies of deconstructing identity (Maraṇa) and identifying the eternal observer (Atman) are structurally indexed as nodes on the right. Gemini's analysis leverages primary scholastic translations (e.g. Sankaracharya, Buddhaghosa, Swami Vidyaranya) to provide uncompromised doctrinal rigor.
+                  The dual methodologies of deconstructing identity (Maraṇa) and identifying the eternal observer (Atman) are structurally indexed across the workspace. Gemini's analysis leverages primary scholastic translations (e.g. Sankaracharya, Buddhaghosa, Swami Vidyaranya) to provide uncompromised doctrinal rigor.
                 </div>
               </div>
             )}
@@ -1334,7 +1471,8 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
         </section>
 
 
-        {/* ==================== RIGHT PANEL: TOPOLOGICAL CONCEPT GRAPH ==================== */}
+        {/* ==================== RIGHT PANEL: TOPOLOGICAL CONCEPT WORKSPACE ==================== */}
+        {workspaceMode === "graph" && (
         <section className="lg:col-span-7 bg-[#0b0c11] p-6 md:p-8 flex flex-col h-full overflow-y-auto space-y-6">
           
           {/* Legend + Search Filter Panel */}
@@ -1456,17 +1594,20 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                     </div>
 
                     <div className="flex items-center gap-3.5 flex-wrap">
-                      {/* Quiet Reading Mode Toggle */}
                       <button
-                        onClick={() => setReadingMode((prev) => !prev)}
-                        className={`text-xs font-sans px-3.5 py-1.5 rounded-md border text-center transition-all cursor-pointer font-bold ${
-                          readingMode
-                            ? "bg-amber-500/20 border-amber-550 text-amber-300 shadow-[0_0_8px_rgba(245,158,11,0.15)]"
-                            : "bg-[#14151e] hover:bg-slate-800 border-slate-750 text-slate-350"
-                        }`}
-                        title="Toggle serene text-forward reading view"
+                        onClick={handleOpenExplorer}
+                        className="text-xs font-sans px-3.5 py-1.5 rounded-md border text-center transition-all cursor-pointer font-bold bg-[#14151e] hover:bg-slate-800 border-slate-750 text-slate-350"
+                        title="Open the keyword, quote, and source explorer"
                       >
-                        {readingMode ? "✓ Reading Mode" : "Quiet Reading Mode"}
+                        Open Explorer
+                      </button>
+
+                      <button
+                        onClick={() => setWorkspaceMode("reading")}
+                        className="text-xs font-sans px-3.5 py-1.5 rounded-md border text-center transition-all cursor-pointer font-bold bg-[#14151e] hover:bg-slate-800 border-slate-750 text-slate-350"
+                        title="Switch to the Reading Desk"
+                      >
+                        Reading Desk
                       </button>
 
                       {/* Show focused constellation toggle */}
@@ -1487,7 +1628,7 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
                         onClick={() => {
                           setActiveKeyword(null);
                           setShowOnlyFocused(false);
-                          setReadingMode(false);
+                          setWorkspaceMode("graph");
                         }}
                         className="text-slate-400 hover:text-red-400 text-xs font-sans font-semibold cursor-pointer border-l border-slate-750 pl-3.5 py-1 transition-colors"
                       >
@@ -1533,6 +1674,37 @@ Our workspace hosts a recursive conceptual graph that traces perspectives on dea
             )}
           </div>
         </section>
+        )}
+
+        {workspaceMode === "explorer" && (
+          <section className="lg:col-span-7 bg-[#0b0c11] p-6 md:p-8 flex flex-col h-full overflow-y-auto space-y-6">
+            <ResearchExplorerPanel
+              activeKeyword={activeKeyword}
+              explorerFacet={explorerFacet}
+              explorerQuery={explorerQuery}
+              onExplorerFacetChange={setExplorerFacet}
+              onExplorerKeywordSelect={handleExplorerKeywordSelect}
+              onExplorerQueryChange={setExplorerQuery}
+              onOpenConcept={handleExplorerOpenConcept}
+              onOpenGraph={handleOpenGraph}
+              researchIndex={researchIndex}
+              selectedNodeId={selectedNodeId}
+            />
+          </section>
+        )}
+
+        {workspaceMode === "reading" && (
+          <section className="lg:col-span-7 bg-[#0b0c11] p-6 md:p-8 flex flex-col h-full overflow-y-auto space-y-6">
+            <ReadingDeskPanel
+              onOpenExplorer={handleOpenExplorer}
+              onOpenGraph={handleOpenGraph}
+              onFocusKeywordInGraph={handleFocusKeywordInGraph}
+              onOpenConcept={handleOpenNodeFromResearch}
+              selectedNode={selectedNode}
+              selectedRelatedConcepts={selectedRelatedConcepts}
+            />
+          </section>
+        )}
 
       </div>
 
