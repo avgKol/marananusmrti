@@ -23,7 +23,7 @@ import {
 } from "./components/ResearchWorkspacePanels";
 import { WorkspaceHeader } from "./components/WorkspaceHeader";
 import { PublicArchivePanel } from "./components/PublicArchivePanel";
-import { ConceptNode } from "./types";
+import { ChatMessage, ConceptNode, RecentGeneratedNodeSummary } from "./types";
 import {
   analyzeFocusVector,
   filterFocusedTree,
@@ -68,6 +68,58 @@ const suggestedPrompts = [
   "Where does Maraṇānusmṛti move from bodily impermanence toward liberation-oriented insight?",
   "Find the strongest bridge concepts between Buddhist impermanence and Vedantic witness-consciousness.",
 ];
+
+const CHAT_HISTORY_STORAGE_KEY = "marananusmrti_chat_history_v1";
+const MAX_PERSISTED_CHAT_MESSAGES = 60;
+
+function buildWelcomeChatMessage(): ChatMessage {
+  return {
+    role: "assistant",
+    content: welcomeMessage,
+    createdAt: "system-welcome",
+    activeNodeTitle: null,
+  };
+}
+
+function normalizePersistedChatMessages(rawValue: unknown): ChatMessage[] {
+  if (!Array.isArray(rawValue)) return [];
+
+  const parsedMessages = rawValue
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const role = (entry as any).role;
+      const content = String((entry as any).content || "").trim();
+      const createdAt = String((entry as any).createdAt || "").trim();
+      const activeNodeTitle =
+        typeof (entry as any).activeNodeTitle === "string"
+          ? (entry as any).activeNodeTitle
+          : null;
+
+      if ((role !== "user" && role !== "assistant") || !content || !createdAt) {
+        return null;
+      }
+
+      return {
+        role,
+        content,
+        createdAt,
+        activeNodeTitle: activeNodeTitle ?? undefined,
+      } satisfies ChatMessage;
+    })
+    .filter((entry) => entry !== null);
+
+  return parsedMessages.slice(-MAX_PERSISTED_CHAT_MESSAGES);
+}
+
+function formatChatTimestamp(value: string): string {
+  if (!value || value === "system-welcome") return "Session guide";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Saved message";
+  return parsed.toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
 function findNodeById(nodeList: ConceptNode[], id: string): ConceptNode | null {
   for (const node of nodeList) {
@@ -142,9 +194,8 @@ export default function App() {
   });
 
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([
-    { role: "assistant", content: welcomeMessage },
-  ]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([buildWelcomeChatMessage()]);
+  const [chatHistoryLoaded, setChatHistoryLoaded] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
@@ -202,6 +253,28 @@ export default function App() {
       keywordCount: keywords.size,
     };
   }, [nodes, publicNodes]);
+
+  const recentGeneratedNodes = useMemo<RecentGeneratedNodeSummary[]>(() => {
+    const flatPublicNodes = flattenTreeView(publicNodes);
+    const titleById = new Map(flatPublicNodes.map((node) => [node.node_id, node.concept_title]));
+
+    return flatPublicNodes
+      .filter((node) => node.origin === "anonymous_ai")
+      .sort((left, right) => {
+        const leftTime = left.createdAt ? new Date(left.createdAt).getTime() : 0;
+        const rightTime = right.createdAt ? new Date(right.createdAt).getTime() : 0;
+        return rightTime - leftTime;
+      })
+      .slice(0, 12)
+      .map((node) => ({
+        node_id: node.node_id,
+        concept_title: node.concept_title,
+        titleBn: node.titleBn,
+        grouping_category: node.grouping_category,
+        createdAt: node.createdAt,
+        parentTitle: node.parentId ? titleById.get(node.parentId) : undefined,
+      }));
+  }, [publicNodes]);
 
   const precisionRatio = useMemo(() => {
     if (totalsObj.currentCount === 0) return 0;
@@ -285,6 +358,31 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const rawValue = window.localStorage.getItem(CHAT_HISTORY_STORAGE_KEY);
+      if (!rawValue) {
+        setChatMessages([buildWelcomeChatMessage()]);
+        return;
+      }
+
+      const parsedValue = JSON.parse(rawValue);
+      const persistedMessages = normalizePersistedChatMessages(parsedValue);
+      setChatMessages(
+        persistedMessages.length > 0
+          ? [buildWelcomeChatMessage(), ...persistedMessages]
+          : [buildWelcomeChatMessage()]
+      );
+    } catch (error) {
+      console.warn("[Marananusmrti] Failed to hydrate chat history:", error);
+      setChatMessages([buildWelcomeChatMessage()]);
+    } finally {
+      setChatHistoryLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!selectedNodeId && nodes.length > 0) {
       setSelectedNodeId(nodes[0].node_id);
       return;
@@ -304,6 +402,20 @@ export default function App() {
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !chatHistoryLoaded) return;
+
+    const persistedMessages = chatMessages
+      .filter((message) => message.createdAt !== "system-welcome")
+      .slice(-MAX_PERSISTED_CHAT_MESSAGES);
+
+    try {
+      window.localStorage.setItem(CHAT_HISTORY_STORAGE_KEY, JSON.stringify(persistedMessages));
+    } catch (error) {
+      console.warn("[Marananusmrti] Failed to persist chat history:", error);
+    }
+  }, [chatHistoryLoaded, chatMessages]);
 
   const refreshPublicCorpus = async (restorePublicView = false) => {
     setIsRefreshingCorpus(true);
@@ -435,12 +547,24 @@ export default function App() {
     handleSelectNode(nodeId);
   };
 
+  const handleClearChatHistory = () => {
+    setChatMessages([buildWelcomeChatMessage()]);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CHAT_HISTORY_STORAGE_KEY);
+    }
+  };
+
   const handleChatSubmit = async (event?: React.FormEvent) => {
     if (event) event.preventDefault();
     if (!chatInput.trim() || chatLoading) return;
 
     const queryText = chatInput;
-    const userMessage = { role: "user" as const, content: queryText };
+    const userMessage: ChatMessage = {
+      role: "user",
+      content: queryText,
+      createdAt: new Date().toISOString(),
+      activeNodeTitle: selectedNode?.concept_title || null,
+    };
     setChatInput("");
     setChatLoading(true);
     setChatMessages((currentMessages) => [...currentMessages, userMessage]);
@@ -451,8 +575,10 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
-            ...chatMessages.filter((message) => !message.content.startsWith("### Welcome")),
-            userMessage,
+            ...chatMessages
+              .filter((message) => message.createdAt !== "system-welcome")
+              .map(({ role, content }) => ({ role, content })),
+            { role: userMessage.role, content: userMessage.content },
           ],
           activeNodeTitle: selectedNode?.concept_title || null,
         }),
@@ -465,7 +591,12 @@ export default function App() {
 
       setChatMessages((currentMessages) => [
         ...currentMessages,
-        { role: "assistant", content: data.text },
+        {
+          role: "assistant",
+          content: data.text,
+          createdAt: new Date().toISOString(),
+          activeNodeTitle: selectedNode?.concept_title || null,
+        },
       ]);
 
       if (data.newNodes && Array.isArray(data.newNodes) && data.newNodes.length > 0 && selectedNodeId) {
@@ -481,6 +612,8 @@ export default function App() {
           {
             role: "assistant",
             content: `*Trace note:* ${label}. Added ${data.newNodes.length} new node(s): ${nodeTitles}.`,
+            createdAt: new Date().toISOString(),
+            activeNodeTitle: selectedNode?.concept_title || null,
           },
         ]);
       }
@@ -490,6 +623,8 @@ export default function App() {
         {
           role: "assistant",
           content: `⚠️ **Scholar interruption:** ${error?.message || "Failed to reach the comparative model."}`,
+          createdAt: new Date().toISOString(),
+          activeNodeTitle: selectedNode?.concept_title || null,
         },
       ]);
     } finally {
@@ -626,6 +761,23 @@ export default function App() {
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
             {leftTab === "assistant" && (
               <div className="flex flex-col h-full space-y-4">
+                <div className="flex items-center justify-between gap-3 p-4 bg-[#13151f] border border-slate-800 rounded-lg">
+                  <div className="space-y-1">
+                    <p className="text-xs font-sans font-semibold uppercase tracking-normal text-slate-300">
+                      Saved Scholar Session
+                    </p>
+                    <p className="text-sm font-sans text-slate-400 leading-relaxed">
+                      This browser keeps your submitted questions and answers so you can return and reread them later.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleClearChatHistory}
+                    className="shrink-0 px-3 py-2 rounded-md text-xs font-sans font-semibold border border-slate-800 text-slate-300 hover:text-slate-100 hover:bg-slate-900/40"
+                  >
+                    Clear saved session
+                  </button>
+                </div>
+
                 <div className="flex-1 space-y-5 pr-1 text-base overflow-y-auto max-h-[50vh] lg:max-h-[58vh]">
                   {chatMessages.map((message, index) => (
                     <div
@@ -649,6 +801,18 @@ export default function App() {
                               <Sparkles size={13} className="text-amber-500" />
                               Comparative Scholar Engine
                             </span>
+                          )}
+                          <span className="text-slate-600">•</span>
+                          <span className="text-[11px] text-slate-500 normal-case tracking-normal">
+                            {formatChatTimestamp(message.createdAt)}
+                          </span>
+                          {message.activeNodeTitle && message.createdAt !== "system-welcome" && (
+                            <>
+                              <span className="text-slate-600">•</span>
+                              <span className="text-[11px] text-slate-500 normal-case tracking-normal">
+                                {message.activeNodeTitle}
+                              </span>
+                            </>
                           )}
                         </div>
 
@@ -820,8 +984,10 @@ export default function App() {
                 snapshotLabel={snapshotLabel}
                 isLocalSnapshot={snapshotSource === "local"}
                 isRefreshing={isRefreshingCorpus}
+                recentGeneratedNodes={recentGeneratedNodes}
                 onDownloadSnapshot={handleDownloadSnapshot}
                 onImportSnapshot={handleImportSnapshot}
+                onOpenGeneratedNode={handleSelectNode}
                 onRefreshPublicCorpus={() => void refreshPublicCorpus(false)}
                 onRestorePublicCorpus={() => void handleRestorePublicCorpus()}
               />

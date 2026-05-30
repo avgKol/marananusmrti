@@ -19,3 +19,19 @@ export interface ConceptNode {
   createdAt?: string;
   sourceNodeId?: string;
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+  activeNodeTitle?: string | null;
+}
+
+export interface RecentGeneratedNodeSummary {
+  node_id: string;
+  concept_title: string;
+  titleBn?: string;
+  grouping_category: string;
+  createdAt?: string;
+  parentTitle?: string;
+}

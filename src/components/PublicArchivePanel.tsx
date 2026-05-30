@@ -1,5 +1,6 @@
 import React from "react";
-import { Download, FileUp, RefreshCw, RotateCcw } from "lucide-react";
+import { Download, FileUp, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
+import { RecentGeneratedNodeSummary } from "../types";
 
 interface PublicArchivePanelProps {
   archiveError: string | null;
@@ -9,10 +10,22 @@ interface PublicArchivePanelProps {
   snapshotLabel: string;
   isLocalSnapshot: boolean;
   isRefreshing: boolean;
+  recentGeneratedNodes: RecentGeneratedNodeSummary[];
   onDownloadSnapshot: () => void;
   onImportSnapshot: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onOpenGeneratedNode: (nodeId: string) => void;
   onRefreshPublicCorpus: () => void;
   onRestorePublicCorpus: () => void;
+}
+
+function formatTimestamp(value?: string): string {
+  if (!value) return "unknown time";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "unknown time";
+  return parsed.toLocaleString([], {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 export function PublicArchivePanel({
@@ -23,8 +36,10 @@ export function PublicArchivePanel({
   snapshotLabel,
   isLocalSnapshot,
   isRefreshing,
+  recentGeneratedNodes,
   onDownloadSnapshot,
   onImportSnapshot,
+  onOpenGeneratedNode,
   onRefreshPublicCorpus,
   onRestorePublicCorpus,
 }: PublicArchivePanelProps) {
@@ -101,6 +116,69 @@ export function PublicArchivePanel({
         )}
         {archiveError && (
           <p className="text-sm font-sans text-red-300 leading-relaxed">{archiveError}</p>
+        )}
+      </div>
+
+      <div className="p-5 bg-[#13151f] border border-slate-800 rounded-lg space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <h3 className="text-sm font-sans font-bold text-slate-200 uppercase tracking-normal flex items-center gap-2">
+              <Sparkles size={14} className="text-amber-400" />
+              Recent Public Generations
+            </h3>
+            <p className="text-sm font-sans text-slate-400 leading-relaxed">
+              The latest AI-created concepts published to the shared public corpus.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded-full bg-[#10131a] border border-slate-800 text-xs font-sans text-slate-300">
+            {recentGeneratedNodes.length} shown
+          </span>
+        </div>
+
+        {recentGeneratedNodes.length > 0 ? (
+          <div className="space-y-3">
+            {recentGeneratedNodes.map((node) => (
+              <div
+                key={node.node_id}
+                className="p-4 rounded-lg border border-slate-800 bg-[#10131a] space-y-2.5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-sm font-sans font-semibold text-slate-100">
+                      {node.concept_title}
+                    </p>
+                    {node.titleBn && (
+                      <p className="text-xs font-sans text-slate-400">{node.titleBn}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => onOpenGeneratedNode(node.node_id)}
+                    className="shrink-0 px-3 py-1.5 rounded-md text-[11px] font-sans font-semibold border border-amber-900/45 bg-amber-950/25 text-amber-300 hover:bg-amber-950/35"
+                  >
+                    Open in Desk
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 text-[11px] font-sans text-slate-400">
+                  <span className="px-2 py-1 rounded-full bg-[#0c0f15] border border-slate-800">
+                    {node.grouping_category}
+                  </span>
+                  {node.parentTitle && (
+                    <span className="px-2 py-1 rounded-full bg-[#0c0f15] border border-slate-800">
+                      Parent: {node.parentTitle}
+                    </span>
+                  )}
+                  <span className="px-2 py-1 rounded-full bg-[#0c0f15] border border-slate-800">
+                    {formatTimestamp(node.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 rounded-lg border border-dashed border-slate-800 bg-[#10131a] text-sm font-sans text-slate-400">
+            No public AI-generated nodes are visible yet.
+          </div>
         )}
       </div>
     </div>
