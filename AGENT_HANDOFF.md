@@ -101,12 +101,13 @@ Git:
 - repo: `https://github.com/avgKol/marananusmrti`
 - branch: `main`
 - implementation commit: `9e3387d` (`Create public Marananusmrti fork`)
+- latest repo head: `04f7191` (`Add handoff and lock workflow docs`)
 
 Cloud Build / Cloud Run:
 
-- Cloud Build: `fe44c087-16b7-4d7f-b0f0-de66afa4b024`
+- Cloud Build: `5340bd0c-0016-4a4b-8c53-c88ffd794b26`
 - Cloud Build status: `SUCCESS`
-- Live revision: `marananusmrti-00003-nll`
+- Live revision: `marananusmrti-00004-dmd`
 - Live URL: `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
 
 Important CI/CD note:
@@ -130,6 +131,7 @@ Verified on the deployed public URL:
   - `Pralaya and the Witness-Self`
 - after reload, the new node still appears in the corpus
 - live concept count increased from `35` to `36`
+- after the final head redeploy, the live page still loads unauthenticated and still shows `Pralaya and the Witness-Self`
 
 ## Open Issue For Next Agent
 
