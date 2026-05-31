@@ -4,70 +4,24 @@ Last updated: `2026-05-30`
 
 ## Current Slice
 
-Created the new public fork project `Marananusmrti` from the Marana-Lab codebase and turned it into an unauthenticated shared research workspace.
+Added durable browser-side Scholar session history and a public recent-generation audit panel.
 
 This slice completed:
 
-- new repo identity and public branding
-- removal of Google sign-in and Drive-dependent UX
-- shared public Firestore corpus model using `public_nodes`
-- checked-in canonical corpus at `src/content/corpus.seed.json`
-- public `Explorer`, `Graph`, and `Reading Desk` workspace
-- public archive tools for JSON download and local snapshot comparison
-- public Gemini assistant + enrichment flow without login
-- public server safeguards: body limits, validation, and IP rate limiting
-- Bengali sanitization hardening so prompt leakage no longer shows in visible titles
+- Scholar Assistant questions and answers now persist in browser localStorage across reloads on the same browser/device
+- saved chat entries now include timestamps and active concept context in the assistant pane
+- users can clear the saved browser session from the assistant pane
+- `Archives` now includes `Recent Public Generations`, sourced from `anonymous_ai` nodes in the shared public corpus
+- recent generated nodes can be opened directly into the Reading Desk from the audit panel
 
 ## Files Changed
 
 Primary implementation files:
 
 - `src/App.tsx`
-- `src/firebase.ts`
 - `src/types.ts`
-- `src/utils/focusAnalysis.ts`
-- `src/utils/researchIndex.ts`
-- `src/lib/publicCorpus.ts`
-- `src/lib/archiveUtils.ts`
-- `src/components/WorkspaceHeader.tsx`
 - `src/components/PublicArchivePanel.tsx`
-- `src/components/ResearchWorkspacePanels.tsx`
-- `src/components/ConceptNodeView.tsx`
-- `server.ts`
-- `firestore.rules`
-- `cloudbuild.yaml`
-
-Project/workflow/docs:
-
-- `README.md`
-- `GOAL.md`
-- `MULTI_AGENT_WORKFLOW.md`
-- `task.md`
-- `walkthrough.md`
-- `security_spec.md`
-- `firebase-blueprint.json`
-- `index.html`
-- `metadata.json`
-- `package.json`
-- `tsconfig.json`
-- `tools/claim-agent-lock.ps1`
-- `tools/release-agent-lock.ps1`
-- `AGENT_LOCK.json`
-
-Removed obsolete private/auth files:
-
-- `src/data.ts`
-- `src/driveUtils.ts`
-- `src/firestoreUtils.ts`
-- `src/googleDrive.ts`
-
-## Data / Persistence Notes
-
-- Exported the richer source corpus and checked it in as `src/content/corpus.seed.json`.
-- Public collection is `public_nodes` in Firestore database `ai-studio-f095d8aa-6c1b-4e17-9435-90603aed9b1c`.
-- Public rules now allow anonymous `read` and `create`, while rejecting `update` and `delete`.
-- A one-time admin migration seeded the live `public_nodes` collection from the richer corpus.
-- Live corpus was later verified to accept anonymous AI-generated child nodes.
+- `src/components/PublicArchivePanel.tsx`
 
 ## Validation Completed
 
@@ -78,19 +32,12 @@ Ran locally:
 
 Local browser / Playwright checks against `http://127.0.0.1:3000`:
 
-- verified the app loads with no auth prompt
-- verified default mode is `Explorer`
-- verified `Open full concept` moves from Explorer into `Reading Desk`
-- verified `Graph` mode renders with focus lens controls
-- verified isolate control is present
-- verified the visible Bengali prompt-leak phrases are no longer rendered
-- verified `Archives` renders public download/import controls
-
-Firestore rule checks:
-
-- malformed anonymous create rejected with `403 PERMISSION_DENIED`
-- anonymous update rejected with `403 PERMISSION_DENIED`
-- anonymous delete rejected with `403 PERMISSION_DENIED`
+- verified the saved session banner appears in Scholar Assistant
+- verified a submitted question is written to localStorage
+- verified the submitted question survives reload in the same browser session
+- verified `Recent Public Generations` renders in `Archives`
+- verified a recent public generated node can open directly in Reading Desk
+- local Gemini answer path returned `Missing Gemini API Key`, but the saved-session persistence still validated correctly
 
 ## Deployment Status
 
@@ -100,14 +47,13 @@ Git:
 
 - repo: `https://github.com/avgKol/marananusmrti`
 - branch: `main`
-- implementation commit: `9e3387d` (`Create public Marananusmrti fork`)
-- latest repo head: `04f7191` (`Add handoff and lock workflow docs`)
+- latest repo head: `3e9262c` (`Add saved scholar sessions and generation log`)
 
 Cloud Build / Cloud Run:
 
-- Cloud Build: `5340bd0c-0016-4a4b-8c53-c88ffd794b26`
+- Cloud Build: `ab3cb793-ec38-4eb3-9dc6-39245e898e2c`
 - Cloud Build status: `SUCCESS`
-- Live revision: `marananusmrti-00004-dmd`
+- Live revision: `marananusmrti-00006-6t5`
 - Live URL: `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
 
 Important CI/CD note:
@@ -122,16 +68,18 @@ Important CI/CD note:
 Verified on the deployed public URL:
 
 - app loads with no Google sign-in or logout UI
-- default landing view is `Explorer`
-- shared public corpus status pill is visible
-- Bengali prompt-leak phrases are not visible on the live page
-- opening a concept binds Scholar Assistant to the selected concept
-- Gemini responds live without login
-- Gemini published a meaningful new public node:
-  - `Pralaya and the Witness-Self`
-- after reload, the new node still appears in the corpus
-- live concept count increased from `35` to `36`
-- after the final head redeploy, the live page still loads unauthenticated and still shows `Pralaya and the Witness-Self`
+- saved session banner appears in Scholar Assistant
+- submitted a live prompt and confirmed the answer rendered
+- confirmed the live prompt was saved to localStorage
+- confirmed the saved live prompt persisted after reload in the same browser session
+- confirmed `Recent Public Generations` appears in `Archives`
+- confirmed `Pralaya and the Witness-Self` is listed in the audit panel
+- confirmed `Open in Desk` from the audit panel works on the live app
+
+Important persistence note:
+
+- question/answer history is now durable per browser via localStorage
+- it is not a shared public transcript across devices or users
 
 ## Open Issue For Next Agent
 
