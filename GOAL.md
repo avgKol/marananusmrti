@@ -28,6 +28,8 @@ These modes should work together as one public research system:
 - Make it easy to move from keyword to quote to source to full concept.
 - Reduce clutter wherever it weakens reading or comparison.
 - Keep Bengali sanitization active in visible UI.
+- Preserve browser-local Scholar session history so a submitted question and answer can be resumed after reload on the same device.
+- Keep a visible public audit trail for recent `anonymous_ai` node generation so visitors can inspect what the shared corpus has added recently.
 
 ## Public Architecture Rules
 
@@ -70,15 +72,32 @@ For any UI or persistence slice:
 
 - commit the slice intentionally
 - push to `origin/main`
-- let Cloud Build / Cloud Run deploy the new revision
+- target true GitHub-triggered Cloud Build -> Cloud Run deploys for `main`
+- if auto-deploy is not yet healthy, record the exact blocker and use a manual Cloud Build deploy only as a temporary fallback
 - verify the public live URL after deployment
 - confirm anonymous load, Gemini response, and public-corpus persistence when behavior is touched
+
+Current CI/CD reality as of `2026-05-30`:
+
+- the old repo `avgKol/marana-lab-take2` has a working classic GitHub trigger
+- the public fork is migrating to a 2nd-gen Cloud Build connection
+- connection `marananusmrti-conn` exists in `us-west1`
+- Secret Manager is enabled and the Cloud Build service agent can manage the GitHub authorizer secret
+- the GitHub authorizer token is attached to the connection
+- the remaining blocker is GitHub App installation completion, currently paused at `PENDING_INSTALL_APP` behind a GitHub step-up/passkey confirmation in the signed-in browser
+
+## Current Operational Targets
+
+1. Finish true push-to-main auto-deploy for `avgKol/marananusmrti`.
+2. Keep the public research workspace usable without auth regressions.
+3. Preserve the browser-local saved Scholar history and the `Recent Public Generations` audit panel.
 
 ## Deployment Context
 
 - project: `gen-lang-client-0390414473`
 - region: `us-west1`
 - target service: `marananusmrti`
+- Cloud Build connection: `marananusmrti-conn`
 
 ## Definition Of Success
 

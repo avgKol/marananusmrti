@@ -4,86 +4,68 @@ Last updated: `2026-05-30`
 
 ## Current Slice
 
-Added durable browser-side Scholar session history and a public recent-generation audit panel.
+Investigated and advanced true GitHub-triggered deployment setup for `avgKol/marananusmrti`, then updated the project goal docs with the exact observed CI/CD state.
 
 This slice completed:
 
-- Scholar Assistant questions and answers now persist in browser localStorage across reloads on the same browser/device
-- saved chat entries now include timestamps and active concept context in the assistant pane
-- users can clear the saved browser session from the assistant pane
-- `Archives` now includes `Recent Public Generations`, sourced from `anonymous_ai` nodes in the shared public corpus
-- recent generated nodes can be opened directly into the Reading Desk from the audit panel
+- enabled `secretmanager.googleapis.com` in GCP project `gen-lang-client-0390414473`
+- granted `roles/secretmanager.admin` to `service-887525091528@gcp-sa-cloudbuild.iam.gserviceaccount.com`
+- created 2nd-gen Cloud Build connection `marananusmrti-conn` in `us-west1`
+- stored the GitHub authorizer token in Secret Manager secret `github-authorizer-token`
+- updated the connection so Cloud Build now holds the authorizer credential
+- advanced the connection state from `PENDING_USER_OAUTH` to `PENDING_INSTALL_APP`
+- identified the Cloud Build GitHub App installation id from the signed-in browser flow: `136472995`
+- confirmed the remaining blocker is a GitHub step-up/passkey confirmation on the installation page
+- updated `GOAL.md` to reflect the saved-session / audit-panel product targets and the exact CI/CD state
 
 ## Files Changed
 
-Primary implementation files:
+Repo files changed in this slice:
 
-- `src/App.tsx`
-- `src/types.ts`
-- `src/components/PublicArchivePanel.tsx`
-- `src/components/PublicArchivePanel.tsx`
+- `GOAL.md`
+- `AGENT_HANDOFF.md`
 
 ## Validation Completed
 
-Ran locally:
+Docs/infrastructure slice:
 
-- `npm run lint`
-- `npm run build`
-
-Local browser / Playwright checks against `http://127.0.0.1:3000`:
-
-- verified the saved session banner appears in Scholar Assistant
-- verified a submitted question is written to localStorage
-- verified the submitted question survives reload in the same browser session
-- verified `Recent Public Generations` renders in `Archives`
-- verified a recent public generated node can open directly in Reading Desk
-- local Gemini answer path returned `Missing Gemini API Key`, but the saved-session persistence still validated correctly
+- no app code changed, so no `npm` validation was required for this slice
+- verified Cloud Build connection state with `gcloud builds connections describe`
+- verified the blocker state in the signed-in browser flow and captured the install path through the GitHub App installation page
 
 ## Deployment Status
 
-Deployment completed successfully.
+No new app deploy in this slice.
 
 Git:
 
 - repo: `https://github.com/avgKol/marananusmrti`
 - branch: `main`
-- latest repo head: `3e9262c` (`Add saved scholar sessions and generation log`)
+- latest deployed app commit before this slice: `0362a4d`
 
-Cloud Build / Cloud Run:
+Cloud Build / Cloud Run state:
 
-- Cloud Build: `ab3cb793-ec38-4eb3-9dc6-39245e898e2c`
-- Cloud Build status: `SUCCESS`
-- Live revision: `marananusmrti-00006-6t5`
-- Live URL: `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
+- live service: `marananusmrti`
+- live URL: `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
+- Cloud Build connection: `marananusmrti-conn`
+- connection stage: `PENDING_INSTALL_APP`
+- Cloud Build GitHub App installation id observed in browser: `136472995`
+- GitHub-side blocker: passkey / step-up confirmation required before the app installation can be completed for the repo
 
 Important CI/CD note:
 
-- `cloudbuild.yaml` is in place and works for repo-based deploys.
-- Creating a GitHub-triggered Cloud Build with `gcloud builds triggers create github ...` still returns generic `INVALID_ARGUMENT`.
-- Most likely blocker: the Cloud Build GitHub App installation is not yet exposing the new `avgKol/marananusmrti` repo to GCP, even though the repo itself exists and `main` is pushed.
-- Until that is fixed, use `gcloud builds submit --project gen-lang-client-0390414473 --config cloudbuild.yaml --substitutions "REPO_NAME=marananusmrti,COMMIT_SHA=<git-sha>"`.
-
-## Live Verification
-
-Verified on the deployed public URL:
-
-- app loads with no Google sign-in or logout UI
-- saved session banner appears in Scholar Assistant
-- submitted a live prompt and confirmed the answer rendered
-- confirmed the live prompt was saved to localStorage
-- confirmed the saved live prompt persisted after reload in the same browser session
-- confirmed `Recent Public Generations` appears in `Archives`
-- confirmed `Pralaya and the Witness-Self` is listed in the audit panel
-- confirmed `Open in Desk` from the audit panel works on the live app
-
-Important persistence note:
-
-- question/answer history is now durable per browser via localStorage
-- it is not a shared public transcript across devices or users
+- `cloudbuild.yaml` still works for manual repo-based deploys.
+- The old repo `avgKol/marana-lab-take2` uses a working classic GitHub trigger.
+- The public fork is now partly migrated to a 2nd-gen connection, but it is not complete yet.
+- After the GitHub authorizer token was attached, the remaining work moved fully to the GitHub App install step.
+- Until that step is completed, use `gcloud builds submit --project gen-lang-client-0390414473 --config cloudbuild.yaml --substitutions "REPO_NAME=marananusmrti,COMMIT_SHA=<git-sha>"`.
 
 ## Open Issue For Next Agent
 
-1. Finish true push-to-main GitOps by exposing the new GitHub repo to the Cloud Build GitHub App, then create a persistent trigger for `avgKol/marananusmrti`.
+1. Finish the GitHub App installation step for connection `marananusmrti-conn`.
+2. Create the Cloud Build repository resource for `avgKol/marananusmrti`.
+3. Create the push trigger for `main`.
+4. Prove auto-deploy with a tiny commit and verify the resulting Cloud Run revision.
 
 ## Notes For The Next Agent
 
@@ -98,3 +80,4 @@ Important persistence note:
 - Preserve the three-mode public research workspace.
 - Preserve the hardened Bengali sanitization path in `src/utils/focusAnalysis.ts`.
 - If you touch deployment, verify both the Cloud Build path and the live public page.
+- If you resume the GitHub App flow, the browser already reached `https://github.com/settings/installations/136472995` before the GitHub passkey / step-up prompt blocked completion.
