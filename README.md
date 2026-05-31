@@ -36,3 +36,4 @@ It keeps the philosophical corpus and Gemini-powered comparative assistance, but
 - Cloud Run service: `marananusmrti`
 
 The intended GitOps flow is push to `main`, let Cloud Build deploy, then verify the live public page and public corpus behavior.
+The verified GitOps flow is push to `main`, let GitHub Actions workflow `.github/workflows/deploy.yml` validate and authenticate via GCP OIDC, let that workflow submit `cloudbuild.yaml`, then verify the live public page and public corpus behavior.

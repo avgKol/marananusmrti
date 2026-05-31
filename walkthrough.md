@@ -24,4 +24,11 @@ This project is a public fork of the Marana-Lab app.
 - region: `us-west1`
 - target service: `marananusmrti`
 
+## Deployment strategy
+
+- push to `main`
+- GitHub Actions workflow `.github/workflows/deploy.yml` starts automatically
+- the workflow validates locally, authenticates to GCP with OIDC, and submits `cloudbuild.yaml`
+- Cloud Build builds and deploys the new Cloud Run revision
+
 Update this file if deployment strategy, service naming, or workflow steps change materially.

@@ -78,6 +78,7 @@ GitOps target:
 - branch: `main`
 
 If GitHub-triggered Cloud Build is configured, let push-to-main drive deployment. If the trigger is not ready yet, document the manual deployment command and create the trigger before closing the slice when feasible.
+Pushes to `main` now trigger `.github/workflows/deploy.yml`. That workflow runs `npm run lint`, `npm run build`, authenticates to GCP through Workload Identity Federation, and then runs `gcloud builds submit --config cloudbuild.yaml`. Before closing a deployment slice, verify both the GitHub Actions run and the resulting Cloud Build / Cloud Run revision.
 
 ## Handoff Protocol
 

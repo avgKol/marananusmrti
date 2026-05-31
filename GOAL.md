@@ -72,23 +72,23 @@ For any UI or persistence slice:
 
 - commit the slice intentionally
 - push to `origin/main`
-- target true GitHub-triggered Cloud Build -> Cloud Run deploys for `main`
-- if auto-deploy is not yet healthy, record the exact blocker and use a manual Cloud Build deploy only as a temporary fallback
+- use the verified push-to-`main` GitHub Actions -> Cloud Build -> Cloud Run path
+- if the auto-deploy path regresses, record the exact blocker and use a manual Cloud Build deploy only as a temporary fallback
 - verify the public live URL after deployment
 - confirm anonymous load, Gemini response, and public-corpus persistence when behavior is touched
 
-Current CI/CD reality as of `2026-05-30`:
+Current CI/CD reality as of `2026-05-31`:
 
 - the old repo `avgKol/marana-lab-take2` has a working classic GitHub trigger
-- the public fork is migrating to a 2nd-gen Cloud Build connection
-- connection `marananusmrti-conn` exists in `us-west1`
-- Secret Manager is enabled and the Cloud Build service agent can manage the GitHub authorizer secret
-- the GitHub authorizer token is attached to the connection
-- the remaining blocker is GitHub App installation completion, currently paused at `PENDING_INSTALL_APP` behind a GitHub step-up/passkey confirmation in the signed-in browser
+- the public fork now has verified push-to-`main` auto-deploy through GitHub Actions workflow `.github/workflows/deploy.yml`
+- GitHub Actions authenticates to GCP through Workload Identity Federation pool `github-actions-pool` and provider `marananusmrti-provider`
+- the workflow submits `cloudbuild.yaml`, and Cloud Build deploys the new Cloud Run revision
+- this path was verified end to end with GitHub Actions run `26699949506`, Cloud Build `11503885-f74a-446c-b368-a4599b38d670`, and Cloud Run revision `marananusmrti-00008-sf9`
+- legacy connection `marananusmrti-conn` still exists but is no longer required for deployment success
 
 ## Current Operational Targets
 
-1. Finish true push-to-main auto-deploy for `avgKol/marananusmrti`.
+1. Preserve the verified push-to-`main` auto-deploy path for `avgKol/marananusmrti`.
 2. Keep the public research workspace usable without auth regressions.
 3. Preserve the browser-local saved Scholar history and the `Recent Public Generations` audit panel.
 
@@ -98,6 +98,7 @@ Current CI/CD reality as of `2026-05-30`:
 - region: `us-west1`
 - target service: `marananusmrti`
 - Cloud Build connection: `marananusmrti-conn`
+- GitHub Actions workflow: `.github/workflows/deploy.yml`
 
 ## Definition Of Success
 
