@@ -83,7 +83,8 @@ Current CI/CD reality as of `2026-05-31`:
 - the public fork now has verified push-to-`main` auto-deploy through GitHub Actions workflow `.github/workflows/deploy.yml`
 - GitHub Actions authenticates to GCP through Workload Identity Federation pool `github-actions-pool` and provider `marananusmrti-provider`
 - the workflow submits `cloudbuild.yaml`, and Cloud Build deploys the new Cloud Run revision
-- this path was verified end to end with GitHub Actions run `26699949506`, Cloud Build `11503885-f74a-446c-b368-a4599b38d670`, and Cloud Run revision `marananusmrti-00008-sf9`
+- this path was verified end to end on the proving workflow run `26699949506`, and again on the latest docs-sync run `26700072907`
+- the latest verified deploy is Cloud Build `8d16b7d2-946a-4eb9-92a5-7db4e5c33bd7` to Cloud Run revision `marananusmrti-00009-l5m`
 - legacy connection `marananusmrti-conn` still exists but is no longer required for deployment success
 
 ## Current Operational Targets

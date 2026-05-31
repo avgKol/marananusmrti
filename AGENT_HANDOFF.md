@@ -18,6 +18,10 @@ This slice completed:
 - verified GitHub Actions run `26699949506` succeeded
 - verified Cloud Build `11503885-f74a-446c-b368-a4599b38d670` succeeded from that workflow
 - verified Cloud Run deployed revision `marananusmrti-00008-sf9`
+- pushed docs commit `e70d95e` and verified the workflow auto-ran again on the final repo state
+- verified GitHub Actions run `26700072907` succeeded
+- verified Cloud Build `8d16b7d2-946a-4eb9-92a5-7db4e5c33bd7` succeeded from that final docs-sync workflow run
+- verified Cloud Run deployed revision `marananusmrti-00009-l5m`
 - updated the docs to reflect the final verified GitHub Actions -> Cloud Build -> Cloud Run path
 
 ## Files Changed
@@ -39,7 +43,9 @@ Infra slice validation:
 - `npm run build`
 - verified GitHub Actions workflow run `26699949506` completed successfully
 - verified Cloud Build `11503885-f74a-446c-b368-a4599b38d670` completed successfully
-- verified the deployed Cloud Run service now points at commit `09247d6894a165ac97a0148bcf1cf01f468ba2f3`
+- verified GitHub Actions workflow run `26700072907` completed successfully
+- verified Cloud Build `8d16b7d2-946a-4eb9-92a5-7db4e5c33bd7` completed successfully
+- verified the deployed Cloud Run service now points at commit `e70d95ee7c05850c60407179a52453cab962a24e`
 - live browser sanity check on `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
 - confirmed the live page loaded unauthenticated and rendered `Marananusmrti` with `Explorer`, `Graph`, and `Reading Desk`
 
@@ -51,19 +57,21 @@ Git:
 
 - repo: `https://github.com/avgKol/marananusmrti`
 - branch: `main`
-- latest repo head: `09247d6` (`Add GitHub Actions deploy workflow`)
+- latest deployed and verified commit: `e70d95e` (`Document verified GitHub Actions deploy path`)
 
 Cloud Build / Cloud Run state:
 
 - live service: `marananusmrti`
 - live URL: `https://marananusmrti-gw6zrea5qq-uw.a.run.app`
 - GitHub Actions workflow: `Deploy Marananusmrti`
-- GitHub Actions run: `26699949506`
+- proving GitHub Actions run: `26699949506`
+- latest GitHub Actions run: `26700072907`
 - GitHub Actions status: `SUCCESS`
-- Cloud Build: `11503885-f74a-446c-b368-a4599b38d670`
+- proving Cloud Build: `11503885-f74a-446c-b368-a4599b38d670`
+- latest Cloud Build: `8d16b7d2-946a-4eb9-92a5-7db4e5c33bd7`
 - Cloud Build status: `SUCCESS`
-- live revision: `marananusmrti-00008-sf9`
-- live deployed commit: `09247d6894a165ac97a0148bcf1cf01f468ba2f3`
+- live revision: `marananusmrti-00009-l5m`
+- live deployed commit: `e70d95ee7c05850c60407179a52453cab962a24e`
 
 Important CI/CD note:
 
@@ -92,4 +100,6 @@ Important CI/CD note:
 - Preserve the three-mode public research workspace.
 - Preserve the hardened Bengali sanitization path in `src/utils/focusAnalysis.ts`.
 - If you touch deployment, verify both the Cloud Build path and the live public page.
-- The verified deploy proof is: GitHub Actions run `26699949506` -> Cloud Build `11503885-f74a-446c-b368-a4599b38d670` -> Cloud Run revision `marananusmrti-00008-sf9`.
+- The verified deploy proof is now two successful pushes in a row:
+  - `09247d6` -> GitHub Actions `26699949506` -> Cloud Build `11503885-f74a-446c-b368-a4599b38d670` -> Cloud Run `marananusmrti-00008-sf9`
+  - `e70d95e` -> GitHub Actions `26700072907` -> Cloud Build `8d16b7d2-946a-4eb9-92a5-7db4e5c33bd7` -> Cloud Run `marananusmrti-00009-l5m`
